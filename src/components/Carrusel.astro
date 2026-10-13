@@ -1,0 +1,165 @@
+---
+import type { LaminaDelSitio } from '../lib/obras';
+import Foto from './Foto.astro';
+
+interface Props {
+  laminas: LaminaDelSitio[];
+  /** Segundos entre láminas. */
+  segundos?: number;
+}
+
+const { laminas, segundos = 6 } = Astro.props;
+const dos = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="carrusel" aria-roledescription="carrusel" aria-label="Obras destacadas" data-carrusel data-segundos={segundos}>
+  {
+    laminas.map(({ obra, foto }, i) => (
+      <div class="lamina" data-lamina data-activa={i === 0 ? '' : undefined} aria-hidden={i === 0 ? 'false' : 'true'}>
+        {/* Solo la primera foto se pide al abrir; el script activa las demás antes de su turno. */}
+        <Foto src={foto.imagen} alt={obra.nombre} sizes="(max-aspect-ratio: 4/3) 104vh, 100vw" prioritaria={i === 0} aplazada={i > 0} />
+      </div>
+    ))
+  }
+  <div class="degradado"></div>
+
+  <div class="base">
+    <div class="textos">
+      {
+        laminas.map(({ obra }, i) => (
+          <a href={`/obras/${obra.slug}/`} class="texto" data-texto hidden={i > 0}>
+            <span class="titular nombre">{obra.nombre}</span>
+            <span class="rotulo ubicacion">{obra.ubicacion} →</span>
+          </a>
+        ))
+      }
+    </div>
+    <div class="controles">
+      <button type="button" aria-label="Anterior" data-anterior>←</button>
+      <span class="contador" data-contador>{dos(1)} / {dos(laminas.length)}</span>
+      <button type="button" aria-label="Siguiente" data-siguiente>→</button>
+    </div>
+  </div>
+  <p class="solo-lectores" aria-live="polite" data-anuncio></p>
+</section>
+
+<script>
+  import { iniciarCarrusel } from '../scripts/carrusel';
+
+  document.querySelectorAll<HTMLElement>('[data-carrusel]').forEach(iniciarCarrusel);
+</script>
+
+<style>
+  .carrusel {
+    position: relative;
+    height: 72svh;
+    overflow: hidden;
+    background: var(--azul);
+    color: var(--claro);
+  }
+
+  .lamina {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1);
+    transition:
+      opacity 1.8s ease-in-out,
+      transform 8s linear;
+  }
+
+  .lamina[data-activa] {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  .lamina :global(picture),
+  .lamina :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lamina :global(img) {
+    object-fit: cover;
+  }
+
+  .degradado {
+    position: absolute;
+    inset: auto 0 0;
+    height: 45%;
+    background: linear-gradient(180deg, rgb(13 24 40 / 0), rgb(13 24 40 / 0.7));
+  }
+
+  .base {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    padding: 0 12px 20px 20px;
+  }
+
+  .texto {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nombre {
+    font-size: var(--titulo-l);
+  }
+
+  .ubicacion {
+    color: var(--gris-foto);
+  }
+
+  .controles {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 4px;
+  }
+
+  /* Sin scripts los botones no hacen nada: se ocultan sin alterar la composición. */
+  :global(html:not(.con-scripts)) .controles {
+    visibility: hidden;
+  }
+
+  button {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .contador {
+    color: var(--gris-foto);
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 720px) {
+    .carrusel {
+      height: 78vh;
+    }
+
+    .base {
+      padding: 0 36px 40px 48px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lamina {
+      transition: none;
+    }
+
+    .lamina[data-activa] {
+      transform: none;
+    }
+  }
+</style>

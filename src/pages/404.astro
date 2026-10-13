@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import { obtenerLaminas } from '../lib/obras';
+
+const laminas = await obtenerLaminas();
+---
+
+<Base titulo="Página no encontrada" imagen={laminas[0]!.foto.imagen}>
+  <main class="aviso">
+    <h1 class="titular">No encontrada</h1>
+    <p class="rotulo">La página que buscas no existe o cambió de dirección.</p>
+    <a href="/" class="rotulo volver">← Ver las obras</a>
+  </main>
+</Base>
+
+<style>
+  .aviso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: var(--ancho-pagina);
+    margin: 0 auto;
+    padding: 72px var(--margen) 0;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: var(--titulo-xl);
+    text-wrap: balance;
+  }
+
+  p {
+    margin: 0;
+    color: var(--gris);
+  }
+
+  .volver {
+    margin-top: 26px;
+    padding: 12px 0;
+    border-bottom: 1px solid currentColor;
+  }
+
+  @media (min-width: 720px) {
+    .aviso {
+      padding-top: 140px;
+    }
+  }
+</style>

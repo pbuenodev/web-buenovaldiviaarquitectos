@@ -1,0 +1,26 @@
+/* Valores del sistema visual. El quiebre entre teléfono y escritorio es 720px. */
+:root {
+  --azul: #0d1828;
+  --papel: #f4f3ef;
+  --claro: #eef0f3;
+  --gris: #5f6a7a; /* texto secundario sobre papel */
+  --gris-claro: #a3adbc; /* texto secundario sobre azul */
+  --gris-foto: #d5dae2; /* texto sobre fotografía */
+  --relleno-foto: #e6e4df; /* fondo mientras carga una foto */
+
+  --fuente: 'Archivo Variable', Helvetica, Arial, sans-serif;
+  --texto: 13px;
+  --espaciado-rotulo: 0.16em;
+  --titulo-xl: clamp(52px, 9vw, 128px);
+  --titulo-l: clamp(40px, 6vw, 88px);
+
+  --ancho-pagina: 1440px;
+  --ancho-fotos: 1160px;
+  --margen: 20px;
+}
+
+@media (min-width: 720px) {
+  :root {
+    --margen: 48px;
+  }
+}

@@ -1,0 +1,62 @@
+---
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import fuente from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import Cabecera from '../components/Cabecera.astro';
+import Pie from '../components/Pie.astro';
+import { sitio } from '../config/site';
+import '../styles/base.css';
+
+interface Props {
+  /** Título de la página; sin él se usa solo el nombre de la oficina. */
+  titulo?: string;
+  descripcion?: string;
+  /** Fotografía de la tarjeta que se ve al compartir el enlace. */
+  imagen: ImageMetadata;
+}
+
+const { titulo, descripcion = sitio.descripcion, imagen } = Astro.props;
+const tituloCompleto = titulo ? `${titulo} · ${sitio.nombre}` : sitio.nombre;
+
+// WhatsApp no muestra de forma fiable AVIF ni WebP en sus tarjetas: se genera un JPEG.
+const tarjeta = await getImage({ src: imagen, width: 1200, height: 630, fit: 'cover', format: 'jpg', quality: 80 });
+const urlTarjeta = new URL(tarjeta.src, Astro.site);
+const urlPagina = new URL(Astro.url.pathname, Astro.site);
+const indexable = import.meta.env.PUBLIC_INDEXABLE === 'true';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    {!indexable && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0d1828" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" as="font" type="font/woff2" href={fuente} crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CL" />
+    <meta property="og:site_name" content={sitio.nombre} />
+    <meta property="og:title" content={titulo ?? sitio.nombre} />
+    <meta property="og:description" content={descripcion} />
+    <meta property="og:url" content={urlPagina} />
+    <meta property="og:image" content={urlTarjeta} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Marca que hay scripts, para no mostrar controles que sin ellos no hacen nada. -->
+    <script is:inline>
+      document.documentElement.classList.add('con-scripts');
+    </script>
+  </head>
+  <body>
+    <Cabecera />
+    <slot />
+    <Pie />
+  </body>
+</html>

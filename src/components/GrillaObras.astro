@@ -1,0 +1,32 @@
+---
+import type { ObraDelSitio } from '../lib/obras';
+import TarjetaObra from './TarjetaObra.astro';
+
+interface Props {
+  obras: ObraDelSitio[];
+}
+
+const { obras } = Astro.props;
+---
+
+<ul class="grilla">
+  {obras.map((obra) => <TarjetaObra obra={obra} />)}
+</ul>
+
+<style>
+  .grilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 720px) {
+    .grilla {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 48px 32px;
+    }
+  }
+</style>

@@ -1,0 +1,8 @@
+nombre: Edificio Panamericana
+ciudad: Las Condes
+ubicacion: Las Condes, Santiago
+categoria: edificios
+orden: 5
+carrusel:
+  foto: exterior-02
+  orden: 4

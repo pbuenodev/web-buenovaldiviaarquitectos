@@ -1,0 +1,35 @@
+---
+import Carrusel from '../components/Carrusel.astro';
+import Filtros from '../components/Filtros.astro';
+import GrillaObras from '../components/GrillaObras.astro';
+import { sitio } from '../config/site';
+import Base from '../layouts/Base.astro';
+import { obtenerLaminas, obtenerObras } from '../lib/obras';
+
+const obras = await obtenerObras();
+const laminas = await obtenerLaminas();
+---
+
+<Base imagen={laminas[0]!.foto.imagen}>
+  <h1 class="solo-lectores">{sitio.nombre}</h1>
+  <Carrusel laminas={laminas} />
+  <main class="obras">
+    <h2 class="solo-lectores">Obras</h2>
+    <Filtros />
+    <GrillaObras obras={obras} />
+  </main>
+</Base>
+
+<style>
+  .obras {
+    max-width: var(--ancho-pagina);
+    margin: 0 auto;
+    padding: 20px var(--margen) 0;
+  }
+
+  @media (min-width: 720px) {
+    .obras {
+      padding-top: 36px;
+    }
+  }
+</style>

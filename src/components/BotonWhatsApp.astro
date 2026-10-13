@@ -1,0 +1,52 @@
+---
+import { sitio } from '../config/site';
+import { enlaceWhatsApp } from '../lib/whatsapp';
+
+interface Props {
+  mensaje: string;
+  /** `oscuro` va sobre fondo claro; `claro`, sobre fondo azul. */
+  variante?: 'oscuro' | 'claro';
+}
+
+const { mensaje, variante = 'oscuro' } = Astro.props;
+---
+
+<a
+  href={enlaceWhatsApp(sitio.whatsapp.numero, mensaje)}
+  target="_blank"
+  rel="noopener"
+  class:list={['rotulo', 'boton', variante]}
+>
+  <slot />
+</a>
+
+<style>
+  .boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    padding: 0 32px;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .oscuro {
+    background: var(--azul);
+    color: var(--claro);
+  }
+
+  .oscuro:hover {
+    opacity: 0.88;
+  }
+
+  .claro {
+    background: var(--claro);
+    color: var(--azul);
+  }
+
+  .claro:hover {
+    background: #fff;
+    opacity: 1;
+  }
+</style>

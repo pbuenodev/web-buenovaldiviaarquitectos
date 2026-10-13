@@ -1,0 +1,8 @@
+nombre: Casas Chicureo
+ciudad: Colina
+ubicacion: Colina, Región Metropolitana
+categoria: casas
+orden: 1
+carrusel:
+  foto: exterior-01
+  orden: 3

@@ -1,0 +1,53 @@
+---
+import type { ObraDelSitio } from '../lib/obras';
+import Foto from './Foto.astro';
+
+interface Props {
+  obra: ObraDelSitio;
+}
+
+const { obra } = Astro.props;
+---
+
+<a href={`/obras/${obra.slug}/`} class="siguiente">
+  <span class="rotulo etiqueta">Siguiente obra</span>
+  <span class="destino">
+    <Foto src={obra.fotoPortada.imagen} alt="" sizes="120px" />
+    <span class="rotulo">{obra.nombre} →</span>
+  </span>
+</a>
+
+<style>
+  .siguiente {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 28px 0;
+    border-top: 1px solid var(--azul);
+    border-bottom: 1px solid rgb(13 24 40 / 0.18);
+  }
+
+  .etiqueta {
+    color: var(--gris);
+  }
+
+  .destino {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .destino :global(img) {
+    width: 72px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--relleno-foto);
+  }
+
+  @media (min-width: 720px) {
+    .destino :global(img) {
+      width: 120px;
+    }
+  }
+</style>

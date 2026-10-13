@@ -1,0 +1,74 @@
+---
+import { CATEGORIAS } from '../lib/catalogo';
+
+const filtros = [['todas', 'Todas'], ...Object.entries(CATEGORIAS)] as [string, string][];
+---
+
+<div class="rotulo filtros" role="group" aria-label="Filtrar obras por categoría" data-filtros>
+  {
+    filtros.map(([id, etiqueta]) => (
+      <button type="button" data-filtro={id} aria-pressed={id === 'todas' ? 'true' : 'false'}>
+        <span>{etiqueta}</span>
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  import { iniciarFiltros } from '../scripts/filtros';
+
+  document.querySelectorAll<HTMLElement>('[data-filtros]').forEach(iniciarFiltros);
+</script>
+
+<style>
+  .filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+    margin-bottom: 16px;
+  }
+
+  /* Sin scripts la grilla muestra todo y los filtros no hacen nada. */
+  :global(html:not(.con-scripts)) .filtros {
+    visibility: hidden;
+  }
+
+  /* El botón mide 44px de alto para el dedo; la línea va pegada al texto, como en el diseño. */
+  button {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--gris);
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+
+  button span {
+    padding: 8px 0;
+    border-bottom: 1px solid transparent;
+  }
+
+  button:hover {
+    opacity: 0.72;
+  }
+
+  button[aria-pressed='true'] {
+    color: var(--azul);
+  }
+
+  button[aria-pressed='true'] span {
+    border-bottom-color: currentColor;
+  }
+
+  @media (min-width: 720px) {
+    .filtros {
+      gap: 0 36px;
+      margin-bottom: 24px;
+    }
+  }
+</style>
