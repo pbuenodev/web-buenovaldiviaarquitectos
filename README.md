@@ -99,6 +99,21 @@ Antes de publicar para el cliente hay que cambiar:
 - [ ] Direcciones de Instagram y Facebook en `src/config/site.ts`
 - [ ] `SITE_URL` con el dominio definitivo
 
+## Despliegue
+
+El sitio se publica en Cloudflare Pages, en <https://web-buenovaldiviaarquitectos.pages.dev/>. Cloudflare construye y publica solo con cada push a la rama de producción; la configuración vive en el panel de Cloudflare, no en el repositorio.
+
+Configuración del proyecto en Cloudflare:
+
+| Campo | Valor |
+|---|---|
+| Rama de producción | `develop` |
+| Comando de build | `pnpm build` |
+| Carpeta de salida | `dist` |
+| Variables | `SITE_URL` con la dirección pública; `NODE_VERSION` 22 o superior; `PNPM_VERSION` igual a la de `packageManager` en `package.json` |
+
+Mientras `PUBLIC_INDEXABLE` no se defina, el sitio publicado lleva `noindex` y los buscadores no lo muestran.
+
 ## Ramas
 
 Se trabaja en `develop` y se integra a `main` (protegida) por pull request.
