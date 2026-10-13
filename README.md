@@ -99,6 +99,20 @@ Antes de publicar para el cliente hay que cambiar:
 - [ ] Direcciones de Instagram y Facebook en `src/config/site.ts`
 - [ ] `SITE_URL` con el dominio definitivo
 
+## Despliegue
+
+El sitio se publica en Cloudflare Workers como sitio estático. `wrangler.jsonc` indica que se sube la carpeta `dist/` tal cual; el campo `name` debe coincidir con el nombre del proyecto en el panel de Cloudflare.
+
+Configuración del proyecto en Cloudflare:
+
+| Campo | Valor |
+|---|---|
+| Comando de build | `pnpm build` |
+| Comando de despliegue | `npx wrangler deploy` |
+| Variables | `SITE_URL` con la dirección pública; `NODE_VERSION` 22 o superior |
+
+Para comprobar la configuración sin publicar: `pnpm build && npx wrangler deploy --dry-run`.
+
 ## Ramas
 
 Se trabaja en `develop` y se integra a `main` (protegida) por pull request.
