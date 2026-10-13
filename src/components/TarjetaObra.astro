@@ -1,0 +1,46 @@
+---
+import type { ObraDelSitio } from '../lib/obras';
+import Foto from './Foto.astro';
+
+interface Props {
+  obra: ObraDelSitio;
+}
+
+const { obra } = Astro.props;
+---
+
+<li data-categoria={obra.categoria}>
+  <a href={`/obras/${obra.slug}/`} class="tarjeta">
+    <Foto src={obra.fotoPortada.imagen} alt={obra.nombre} sizes="(min-width: 720px) 33vw, 50vw" />
+    <span class="datos">
+      <span>{obra.nombre}</span>
+      <span class="ciudad">{obra.ciudad}</span>
+    </span>
+  </a>
+</li>
+
+<style>
+  .tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tarjeta :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--relleno-foto);
+  }
+
+  .datos {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
+  .ciudad {
+    color: var(--gris);
+  }
+</style>

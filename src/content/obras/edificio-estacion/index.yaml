@@ -1,0 +1,8 @@
+nombre: Edificio Estación
+ciudad: Concepción
+ubicacion: Concepción, Biobío
+categoria: edificios
+orden: 4
+carrusel:
+  foto: exterior-01
+  orden: 6

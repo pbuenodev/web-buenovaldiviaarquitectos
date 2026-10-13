@@ -1,0 +1,8 @@
+nombre: Edificio Los Leones
+ciudad: Providencia
+ubicacion: Providencia, Santiago
+categoria: edificios
+orden: 6
+carrusel:
+  foto: exterior-01
+  orden: 2

@@ -1,0 +1,136 @@
+---
+import marca from '../assets/logo/logo-marca-claro.svg';
+import { sitio } from '../config/site';
+import BotonWhatsApp from './BotonWhatsApp.astro';
+
+const redes = sitio.redes.filter((red) => red.url);
+---
+
+<footer id="contacto" class="pie">
+  <div class="interior">
+    <div class="encabezado">
+      <h2 class="rotulo etiqueta">Contacto</h2>
+      <p class="titular nombre">Bueno Valdivia<br />Arquitectos</p>
+    </div>
+
+    <div class="vias">
+      <div class="whatsapp">
+        <BotonWhatsApp mensaje={sitio.whatsapp.mensajeGeneral} variante="claro">Escribir por WhatsApp</BotonWhatsApp>
+        <span class="numero">{sitio.whatsapp.numero}</span>
+      </div>
+      {
+        redes.length > 0 && (
+          <ul class="rotulo redes">
+            {redes.map((red) => (
+              <li>
+                <a href={red.url} target="_blank" rel="noopener">
+                  {red.nombre}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+
+    <div class="cierre">
+      <img src={marca.src} alt="" width={marca.width} height={marca.height} />
+      <span class="rotulo">{sitio.lema}</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    margin-top: 80px;
+    background: var(--azul);
+    color: var(--claro);
+  }
+
+  .interior {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: var(--ancho-pagina);
+    margin: 0 auto;
+    padding: 56px var(--margen) 32px;
+  }
+
+  .encabezado {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .etiqueta {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: var(--gris-claro);
+  }
+
+  .nombre {
+    font-size: var(--titulo-xl);
+  }
+
+  .vias {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+
+  .whatsapp {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .numero {
+    color: var(--gris-claro);
+    letter-spacing: 0.04em;
+  }
+
+  .redes {
+    display: flex;
+    gap: 32px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .redes a {
+    display: block;
+    padding: 12px 0;
+    border-bottom: 1px solid rgb(238 240 243 / 0.35);
+  }
+
+  .cierre {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid rgb(238 240 243 / 0.16);
+    color: var(--gris-claro);
+  }
+
+  .cierre img {
+    width: auto;
+    height: 32px;
+  }
+
+  @media (min-width: 720px) {
+    .pie {
+      margin-top: 140px;
+    }
+
+    .interior {
+      gap: 64px;
+      padding-block: 96px 40px;
+    }
+  }
+</style>

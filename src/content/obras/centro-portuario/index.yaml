@@ -1,0 +1,8 @@
+nombre: Centro Portuario
+ciudad: San Antonio
+ubicacion: San Antonio, Valparaíso
+categoria: edificios
+orden: 3
+carrusel:
+  foto: exterior-03
+  orden: 5

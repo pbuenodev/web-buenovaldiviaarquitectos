@@ -1,0 +1,154 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BotonWhatsApp from '../../components/BotonWhatsApp.astro';
+import Foto from '../../components/Foto.astro';
+import SiguienteObra from '../../components/SiguienteObra.astro';
+import { sitio } from '../../config/site';
+import Base from '../../layouts/Base.astro';
+import { esAngosta, obraSiguiente } from '../../lib/catalogo';
+import { obtenerObras, type ObraDelSitio } from '../../lib/obras';
+
+export const getStaticPaths = (async () => {
+  const obras = await obtenerObras();
+  return obras.map((obra) => ({
+    params: { slug: obra.slug },
+    props: { obra, siguiente: obraSiguiente(obras, obra.slug) },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  obra: ObraDelSitio;
+  siguiente: ObraDelSitio;
+}
+
+const { obra, siguiente } = Astro.props;
+---
+
+<Base
+  titulo={obra.nombre}
+  descripcion={`${obra.nombre}, ${obra.ubicacion}. Obra de ${sitio.nombre}.`}
+  imagen={obra.fotoPortada.imagen}
+>
+  <main class="ficha">
+    <a href="/" class="rotulo volver">← Obras</a>
+
+    <header class="encabezado">
+      <h1 class="titular">{obra.nombre}</h1>
+      <p class="rotulo ubicacion">{obra.ubicacion}</p>
+    </header>
+
+    <div class="fotos">
+      {
+        obra.fotos.map((foto) => {
+          const angosta = esAngosta(foto.imagen);
+          return (
+            <Foto
+              src={foto.imagen}
+              alt={obra.nombre}
+              sizes={angosta ? '(min-width: 720px) 680px, 78vw' : '(min-width: 1256px) 1160px, 100vw'}
+              class={angosta ? 'angosta' : undefined}
+            />
+          );
+        })
+      }
+    </div>
+
+    <div class="cierre">
+      <SiguienteObra obra={siguiente} />
+      <div class="consulta">
+        <BotonWhatsApp mensaje={sitio.whatsapp.mensajeObra(obra.nombre)}>Consultar por WhatsApp</BotonWhatsApp>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .ficha {
+    max-width: var(--ancho-pagina);
+    margin: 0 auto;
+    padding: 20px var(--margen) 0;
+  }
+
+  .volver {
+    display: inline-block;
+    padding: 12px 0;
+    color: var(--gris);
+  }
+
+  .encabezado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 28px 0 48px;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: var(--titulo-xl);
+    text-wrap: balance;
+  }
+
+  .ubicacion {
+    margin: 0;
+    color: var(--gris);
+  }
+
+  .fotos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    max-width: var(--ancho-fotos);
+    margin: 0 auto;
+  }
+
+  .fotos :global(picture) {
+    width: 100%;
+  }
+
+  .fotos :global(img) {
+    width: 100%;
+    background: var(--relleno-foto);
+  }
+
+  /* Fotos verticales o de baja resolución: más angostas y centradas. */
+  .fotos :global(picture.angosta) {
+    width: 78%;
+  }
+
+  .cierre {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: var(--ancho-fotos);
+    margin: 72px auto 0;
+  }
+
+  .consulta {
+    display: flex;
+    justify-content: center;
+  }
+
+  @media (min-width: 720px) {
+    .ficha {
+      padding-top: 36px;
+    }
+
+    .encabezado {
+      padding: 52px 0 96px;
+    }
+
+    .fotos {
+      gap: 96px;
+    }
+
+    .fotos :global(picture.angosta) {
+      width: min(100%, 680px);
+    }
+
+    .cierre {
+      margin-top: 140px;
+    }
+  }
+</style>

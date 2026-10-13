@@ -1,0 +1,42 @@
+---
+import logo from '../assets/logo/logo-claro.svg';
+import { sitio } from '../config/site';
+---
+
+<header class="cabecera">
+  <a href="/" class="logo">
+    <img src={logo.src} alt={sitio.nombre} width={logo.width} height={logo.height} />
+  </a>
+  <a href="#contacto" class="rotulo contacto">Contacto</a>
+</header>
+
+<style>
+  .cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px var(--margen);
+    background: var(--azul);
+    color: var(--claro);
+  }
+
+  .logo img {
+    width: auto;
+    height: 64px;
+  }
+
+  .contacto {
+    padding: 12px 0;
+  }
+
+  @media (min-width: 720px) {
+    .cabecera {
+      padding-block: 32px;
+    }
+
+    .logo img {
+      height: 96px;
+    }
+  }
+</style>

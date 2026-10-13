@@ -1,0 +1,8 @@
+nombre: Casa La Quebrada
+ciudad: Viña del Mar
+ubicacion: Viña del Mar, Valparaíso
+categoria: casas
+orden: 2
+carrusel:
+  foto: exterior-03
+  orden: 1
