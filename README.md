@@ -101,17 +101,18 @@ Antes de publicar para el cliente hay que cambiar:
 
 ## Despliegue
 
-El sitio se publica en Cloudflare Workers como sitio estático. `wrangler.jsonc` indica que se sube la carpeta `dist/` tal cual; el campo `name` debe coincidir con el nombre del proyecto en el panel de Cloudflare.
+El sitio se publica en Cloudflare Pages, en <https://web-buenovaldiviaarquitectos.pages.dev/>. Cloudflare construye y publica solo con cada push a la rama de producción; la configuración vive en el panel de Cloudflare, no en el repositorio.
 
 Configuración del proyecto en Cloudflare:
 
 | Campo | Valor |
 |---|---|
+| Rama de producción | `develop` |
 | Comando de build | `pnpm build` |
-| Comando de despliegue | `npx wrangler deploy` |
-| Variables | `SITE_URL` con la dirección pública; `NODE_VERSION` 22 o superior |
+| Carpeta de salida | `dist` |
+| Variables | `SITE_URL` con la dirección pública; `NODE_VERSION` 22 o superior; `PNPM_VERSION` igual a la de `packageManager` en `package.json` |
 
-Para comprobar la configuración sin publicar: `pnpm build && npx wrangler deploy --dry-run`.
+Mientras `PUBLIC_INDEXABLE` no se defina, el sitio publicado lleva `noindex` y los buscadores no lo muestran.
 
 ## Ramas
 
