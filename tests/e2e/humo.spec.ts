@@ -168,6 +168,23 @@ test.describe('ficha de obra', () => {
     await sinDesbordeHorizontal(page);
   });
 
+  test('las fotos van en 2 columnas sobre 1080 px y en una sola por debajo', async ({ page, isMobile }) => {
+    await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
+    const fotos = page.locator('.fotos picture');
+    const [primera, segunda] = [(await fotos.nth(0).boundingBox())!, (await fotos.nth(1).boundingBox())!];
+    if (isMobile) {
+      expect(segunda.y, 'en teléfono la segunda va debajo').toBeGreaterThanOrEqual(primera.y + primera.height);
+    } else {
+      expect(segunda.y, 'en escritorio comparten fila').toBe(primera.y);
+      expect(segunda.x, 'la segunda va a la derecha').toBeGreaterThan(primera.x + primera.width);
+    }
+    await sinDesbordeHorizontal(page);
+
+    await page.setViewportSize({ width: 1080, height: 900 });
+    const [a, b] = [(await fotos.nth(0).boundingBox())!, (await fotos.nth(1).boundingBox())!];
+    expect(b.y, 'a 1080 px sigue la columna única').toBeGreaterThanOrEqual(a.y + a.height);
+  });
+
   test('las fotos se cargan de forma diferida y en AVIF al llegar a ellas', async ({ page }) => {
     await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
     // Cuánto se adelanta cada navegador es cosa suya; aquí se comprueba que todas quedan diferidas.
@@ -202,6 +219,7 @@ test.describe('ficha de obra', () => {
     await page.goto(`/obras/${ULTIMA_OBRA.slug}/`);
     const boton = page.getByRole('link', { name: 'Consultar por WhatsApp' });
     await expect(boton).toHaveAttribute('target', '_blank');
+    await expect(boton.locator('svg[aria-hidden="true"]')).toHaveCount(1);
     const enlace = new URL((await boton.getAttribute('href'))!);
     expect(enlace.origin + enlace.pathname).toBe('https://wa.me/56900000000');
     expect(enlace.searchParams.get('text')).toBe(
@@ -225,11 +243,22 @@ test.describe('contacto', () => {
       const enlace = new URL((await boton.getAttribute('href'))!);
       expect(enlace.origin + enlace.pathname).toBe('https://wa.me/56900000000');
       expect(enlace.searchParams.get('text')).toBe('Hola, vi su portafolio y me gustaría conversar sobre un proyecto.');
+      await expect(boton.locator('svg[aria-hidden="true"]')).toHaveCount(1);
 
       for (const red of ['Instagram', 'Facebook']) {
-        await expect(pie.getByRole('link', { name: red })).toHaveAttribute('target', '_blank');
-        await expect(pie.getByRole('link', { name: red })).toHaveAttribute('rel', 'noopener');
+        const enlaceRed = pie.getByRole('link', { name: red, exact: true });
+        await expect(enlaceRed).toHaveAttribute('target', '_blank');
+        await expect(enlaceRed).toHaveAttribute('rel', 'noopener');
+        await expect(enlaceRed.locator('svg[aria-hidden="true"]')).toBeVisible();
       }
+    });
+
+    test(`la marca del pie de ${ruta} se ve más grande`, async ({ page, isMobile }) => {
+      await page.goto(ruta);
+      const marca = page.locator('#contacto .cierre img');
+      const caja = await marca.boundingBox();
+      expect(caja!.height).toBe(isMobile ? 40 : 48);
+      await sinDesbordeHorizontal(page);
     });
 
     test(`"Contacto" en la cabecera de ${ruta} baja al pie sin cambiar de página`, async ({ page }) => {
