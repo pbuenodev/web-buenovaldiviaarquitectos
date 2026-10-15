@@ -1,9 +1,12 @@
 ---
 import marca from '../assets/logo/logo-marca-claro.svg';
+import LogoFacebook from '../assets/redes/facebook.svg';
+import LogoInstagram from '../assets/redes/instagram.svg';
 import { sitio } from '../config/site';
 import BotonWhatsApp from './BotonWhatsApp.astro';
 
-const redes = sitio.redes.filter((red) => red.url);
+const logos: Record<string, typeof LogoInstagram> = { Instagram: LogoInstagram, Facebook: LogoFacebook };
+const redes = sitio.redes.filter((red) => red.url).map((red) => ({ ...red, Logo: logos[red.nombre] }));
 ---
 
 <footer id="contacto" class="pie">
@@ -21,10 +24,11 @@ const redes = sitio.redes.filter((red) => red.url);
       {
         redes.length > 0 && (
           <ul class="rotulo redes">
-            {redes.map((red) => (
+            {redes.map(({ nombre, url, Logo }) => (
               <li>
-                <a href={red.url} target="_blank" rel="noopener">
-                  {red.nombre}
+                <a href={url} target="_blank" rel="noopener">
+                  {Logo && <Logo aria-hidden="true" focusable="false" />}
+                  {nombre}
                 </a>
               </li>
             ))}
@@ -102,9 +106,17 @@ const redes = sitio.redes.filter((red) => red.url);
   }
 
   .redes a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 12px 0;
     border-bottom: 1px solid rgb(238 240 243 / 0.35);
+  }
+
+  .redes :global(svg) {
+    flex: none;
+    width: 20px;
+    height: 20px;
   }
 
   .cierre {
@@ -120,7 +132,7 @@ const redes = sitio.redes.filter((red) => red.url);
 
   .cierre img {
     width: auto;
-    height: 32px;
+    height: 40px;
   }
 
   @media (min-width: 720px) {
@@ -131,6 +143,10 @@ const redes = sitio.redes.filter((red) => red.url);
     .interior {
       gap: 64px;
       padding-block: 96px 40px;
+    }
+
+    .cierre img {
+      height: 48px;
     }
   }
 </style>

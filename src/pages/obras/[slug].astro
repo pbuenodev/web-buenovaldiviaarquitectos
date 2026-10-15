@@ -45,7 +45,11 @@ const { obra, siguiente } = Astro.props;
             <Foto
               src={foto.imagen}
               alt={obra.nombre}
-              sizes={angosta ? '(min-width: 720px) 680px, 78vw' : '(min-width: 1256px) 1160px, 100vw'}
+              sizes={
+                angosta
+                  ? '(min-width: 1081px) 556px, (min-width: 720px) 680px, 78vw'
+                  : '(min-width: 1256px) 556px, (min-width: 1081px) calc(50vw - 72px), 100vw'
+              }
               class={angosta ? 'angosta' : undefined}
             />
           );
@@ -149,6 +153,36 @@ const { obra, siguiente } = Astro.props;
 
     .cierre {
       margin-top: 140px;
+    }
+  }
+
+  /* Más de 1080 px: dos columnas, en el orden del catálogo. Las media queries no admiten variables. */
+  @media (min-width: 1081px) {
+    .fotos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 64px 48px;
+      align-items: start;
+    }
+
+    .fotos :global(picture),
+    .fotos :global(picture.angosta) {
+      width: 100%;
+    }
+
+    /* Sin ampliar más allá del ancho de origen. */
+    .fotos :global(img) {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+
+    /* Cantidad impar: la última queda sola, centrada y con el ancho de una columna. */
+    .fotos :global(picture:last-child:nth-child(odd)) {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: calc(50% - 24px);
     }
   }
 </style>
