@@ -1,0 +1,9 @@
+nombre: "Edificio Central Tráfico Alameda"
+ciudad: "Por confirmar" # PREGUNTA ABIERTA
+ubicacion: "Por confirmar" # PREGUNTA ABIERTA
+categoria: edificios
+orden: 6
+portada: foto-03
+carrusel:
+  foto: foto-03
+  orden: 2

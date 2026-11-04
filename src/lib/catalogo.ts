@@ -2,7 +2,8 @@
 
 export const CATEGORIAS = {
   casas: 'Casas',
-  edificios: 'Edificios públicos',
+  edificios: 'Edificios',
+  comercial: 'Comercial',
 } as const;
 
 export type Categoria = keyof typeof CATEGORIAS;

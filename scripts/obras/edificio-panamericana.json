@@ -1,0 +1,11 @@
+{
+  "origen": "07-edificio-panamericana",
+  "nombre": "Edificio Panamericana",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "edificios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

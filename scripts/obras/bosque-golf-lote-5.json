@@ -1,0 +1,14 @@
+{
+  "origen": "01-bosque-golf-lote-5",
+  "nombre": "Bosque Golf, Lote 5",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "carrusel": {
+    "orden": 1
+  }
+}

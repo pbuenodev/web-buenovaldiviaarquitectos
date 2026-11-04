@@ -3,13 +3,21 @@ import { expect, test, type Page } from '@playwright/test';
 // Prueba de humo del sitio construido. Se ejecuta en teléfono (390 px) y escritorio (1440 px).
 // Los nombres y cantidades corresponden a las obras cargadas en `src/content/obras/`.
 
-const OBRAS = 6;
-const CASAS = 2;
-const EDIFICIOS = 4;
-const PRIMERA_OBRA = { slug: 'casas-chicureo', nombre: 'Casas Chicureo' };
-const ULTIMA_OBRA = { slug: 'edificio-los-leones', nombre: 'Edificio Los Leones' };
+const OBRAS = 14; // obras en la grilla
+const LAMINAS = 3; // obras que participan en el hero
+const CASAS = 8;
+const EDIFICIOS = 3;
+const COMERCIAL = 3;
+const PRIMERA_OBRA = { slug: 'bosque-golf-lote-5', nombre: 'Bosque Golf, Lote 5', fotos: 10 };
+const SEGUNDA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio' };
+const ULTIMA_OBRA = { slug: 'colegio-charles-school', nombre: 'Colegio Charles School' };
+// Primera foto de la portada (orden 1).
+const LAMINA_1 = PRIMERA_OBRA.nombre;
+const NOMBRE_OFICINA = 'Bueno Valdivia Arquitectos';
 
-const contador = (page: Page) => page.locator('[data-contador]');
+const laminaActiva = (page: Page) => page.locator('[data-lamina][data-activa] img');
+const menu = (page: Page) => page.locator('#menu');
+const abrirMenu = (page: Page) => page.getByRole('button', { name: 'Menú' }).click();
 const tarjetasVisibles = (page: Page) => page.locator('.grilla li:visible');
 
 async function sinDesbordeHorizontal(page: Page) {
@@ -21,93 +29,70 @@ async function sinDesbordeHorizontal(page: Page) {
 }
 
 test.describe('inicio', () => {
-  test('muestra la primera lámina, el contador y la grilla completa', async ({ page }) => {
+  test('muestra la portada con el nombre de la oficina y la grilla completa', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Bueno Valdivia Arquitectos');
+    await expect(page).toHaveTitle(NOMBRE_OFICINA);
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
-    await expect(contador(page)).toHaveText('01 / 06');
-    await expect(page.locator('[data-texto]:visible .nombre')).toHaveText('Casa La Quebrada');
-    await expect(page.locator('[data-texto]:visible .ubicacion')).toContainText('Viña del Mar, Valparaíso');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Bueno Valdivia\s*Arquitectos/i);
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
+    await expect(page.locator('[data-portada]')).toBeInViewport();
+    const portada = (await page.locator('[data-portada]').boundingBox())!;
+    expect(portada.height).toBeGreaterThanOrEqual((page.viewportSize()!.height * 0.95));
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
     await expect(page.locator('.grilla li').first()).toContainText(PRIMERA_OBRA.nombre);
     await sinDesbordeHorizontal(page);
   });
 
-  test('los botones del carrusel cambian de lámina y dan la vuelta', async ({ page }) => {
+  test('la portada no tiene botones, contador ni enlace a una obra', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Siguiente' }).click();
-    await expect(contador(page)).toHaveText('02 / 06');
-    await expect(page.locator('[data-texto]:visible .nombre')).toHaveText('Edificio Los Leones');
-    await expect(page.locator('[data-anuncio]')).toHaveText('Edificio Los Leones, 2 de 6');
-
-    await page.getByRole('button', { name: 'Anterior' }).click();
-    await page.getByRole('button', { name: 'Anterior' }).click();
-    await expect(contador(page)).toHaveText('06 / 06');
-    await expect(page.locator('[data-lamina][data-activa]')).toHaveCount(1);
+    const portada = page.locator('[data-portada]');
+    await expect(portada.getByRole('button')).toHaveCount(0);
+    await expect(portada.getByText(/\d\d \/ \d\d/)).toHaveCount(0);
+    await expect(portada.locator('a[href^="/obras/"]')).toHaveCount(0);
   });
 
-  test('el carrusel se maneja con el teclado', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Siguiente' }).focus();
-    await page.keyboard.press('Enter');
-    await expect(contador(page)).toHaveText('02 / 06');
-  });
-
-  test('el carrusel avanza solo cada 6 segundos y la interacción reinicia la cuenta', async ({ page }) => {
+  test('la portada avanza sola cada 5 segundos, da la vuelta y el título no cambia', async ({ page }) => {
     await page.clock.install();
     await page.goto('/');
-    await page.clock.runFor(5900);
-    await expect(contador(page)).toHaveText('01 / 06');
+    const titulo = await page.getByRole('heading', { level: 1 }).innerText();
+    await page.clock.runFor(4900);
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
     await page.clock.runFor(200);
-    await expect(contador(page)).toHaveText('02 / 06');
+    await expect(laminaActiva(page)).not.toHaveAttribute('alt', LAMINA_1);
+    await expect(page.locator('[data-lamina][data-activa]')).toHaveCount(1);
+    expect(await page.getByRole('heading', { level: 1 }).innerText()).toBe(titulo);
 
-    await page.clock.runFor(4000);
-    await page.getByRole('button', { name: 'Siguiente' }).click();
-    await expect(contador(page)).toHaveText('03 / 06');
-    await page.clock.runFor(5900);
-    await expect(contador(page)).toHaveText('03 / 06');
-    await page.clock.runFor(200);
-    await expect(contador(page)).toHaveText('04 / 06');
+    await page.clock.runFor(5000 * (LAMINAS - 1));
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
   });
 
-  test('con movimiento reducido el carrusel no avanza solo', async ({ page }) => {
+  test('la portada se detiene con la pestaña oculta', async ({ page }) => {
+    await page.clock.install();
+    await page.goto('/');
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await page.clock.runFor(12000);
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
+  });
+
+  test('con movimiento reducido la portada no avanza ni hace fundido', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.clock.install();
     await page.goto('/');
     await page.clock.runFor(13000);
-    await expect(contador(page)).toHaveText('01 / 06');
-    await page.getByRole('button', { name: 'Siguiente' }).click();
-    await expect(contador(page)).toHaveText('02 / 06');
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
+    await expect(page.locator('[data-lamina]').first()).toHaveCSS('transition-duration', '0s');
   });
 
-  test('deslizar sobre el carrusel cambia de lámina', async ({ page, hasTouch }) => {
-    test.skip(!hasTouch, 'solo en pantallas táctiles');
-    await page.goto('/');
-    const deslizar = (desde: number, hasta: number) =>
-      page.locator('[data-carrusel]').evaluate(
-        (el, [x0, x1]) => {
-          const toque = (x: number) => new Touch({ identifier: 1, target: el, clientX: x, clientY: 300 });
-          el.dispatchEvent(new TouchEvent('touchstart', { touches: [toque(x0!)], bubbles: true }));
-          el.dispatchEvent(new TouchEvent('touchend', { changedTouches: [toque(x1!)], bubbles: true }));
-        },
-        [desde, hasta],
-      );
-
-    await deslizar(300, 280);
-    await expect(contador(page), 'un gesto de menos de 40 px no cambia la lámina').toHaveText('01 / 06');
-    await deslizar(300, 200);
-    await expect(contador(page)).toHaveText('02 / 06');
-    await deslizar(100, 200);
-    await expect(contador(page)).toHaveText('01 / 06');
-  });
-
-  test('solo la primera foto del carrusel se pide con prioridad; las demás esperan su turno', async ({ page }) => {
+  test('solo la primera foto de la portada se pide con prioridad; las demás esperan su turno', async ({ page }) => {
     await page.goto('/');
     const primera = page.locator('[data-lamina] img').first();
     await expect(primera).toHaveAttribute('loading', 'eager');
     await expect(primera).toHaveAttribute('fetchpriority', 'high');
-    // Al abrir se activan la primera y la siguiente; las otras cuatro siguen aplazadas.
-    await expect(page.locator('[data-lamina] img[data-src]')).toHaveCount(OBRAS - 2);
+    // Al abrir se activan la primera y la siguiente; las demás siguen aplazadas.
+    await expect(page.locator('[data-lamina] img[data-src]')).toHaveCount(LAMINAS - 2);
     await expect(page.locator('.grilla img').first()).toHaveAttribute('loading', 'lazy');
   });
 
@@ -126,40 +111,101 @@ test.describe('inicio', () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(desplazamiento);
     expect(new URL(page.url()).pathname).toBe('/');
 
-    await filtro('Edificios públicos').click();
+    await filtro('Edificios').click();
     await expect(tarjetasVisibles(page)).toHaveCount(EDIFICIOS);
+
+    await filtro('Comercial').click();
+    await expect(tarjetasVisibles(page)).toHaveCount(COMERCIAL);
+    await expect(filtro('Comercial')).toHaveAttribute('aria-pressed', 'true');
 
     await filtro('Todas').click();
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
   });
 
-  test('sin scripts se ven la primera lámina y todas las obras', async ({ browser, baseURL }) => {
+  test('sin scripts se ven la primera foto, el menú y todas las obras', async ({ browser, baseURL }) => {
     const contexto = await browser.newContext({ javaScriptEnabled: false, baseURL });
     const page = await contexto.newPage();
     await page.goto('/');
-    await expect(page.locator('[data-lamina][data-activa] img')).toHaveAttribute('src', /\.webp$/);
-    await expect(page.locator('[data-texto]:visible')).toHaveAttribute('href', '/obras/casa-la-quebrada/');
+    await expect(laminaActiva(page)).toHaveAttribute('src', /\.webp$/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
-    await expect(page.locator('.controles')).toHaveCSS('visibility', 'hidden');
     await expect(page.locator('[data-filtros]')).toHaveCSS('visibility', 'hidden');
+    await abrirMenu(page);
+    await expect(menu(page)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu(page)).toBeHidden();
     await contexto.close();
   });
 });
 
+test.describe('cabecera y menú', () => {
+  test('en el inicio el logo y el menú van sobre la foto, sin fondo propio', async ({ page }) => {
+    await page.goto('/');
+    const cabecera = page.locator('.cabecera');
+    await expect(cabecera).toHaveCSS('position', 'absolute');
+    const portada = (await page.locator('[data-portada]').boundingBox())!;
+    const caja = (await cabecera.boundingBox())!;
+    expect(caja.y).toBeGreaterThanOrEqual(portada.y);
+    expect(caja.y + caja.height).toBeLessThanOrEqual(portada.y + portada.height);
+    const logo = (await page.getByRole('link', { name: NOMBRE_OFICINA }).boundingBox())!;
+    const ancho = page.viewportSize()!.width;
+    expect(Math.abs(logo.x + logo.width / 2 - ancho / 2), 'el logo va centrado').toBeLessThan(2);
+  });
+
+  test('en una ficha y en el 404 la cabecera conserva el fondo azul', async ({ page }) => {
+    for (const ruta of [`/obras/${PRIMERA_OBRA.slug}/`, '/no-existe/']) {
+      await page.goto(ruta);
+      await expect(page.locator('.cabecera')).toHaveCSS('background-color', 'rgb(13, 24, 40)');
+      await expect(page.getByRole('button', { name: 'Menú' })).toBeVisible();
+    }
+  });
+
+  test('"Contacto" del menú baja al pie y cierra el menú', async ({ page }) => {
+    await page.goto('/');
+    await abrirMenu(page);
+    await menu(page).getByRole('link', { name: 'Contacto' }).click();
+    await expect(page).toHaveURL('/#contacto');
+    await expect(menu(page)).toBeHidden();
+    await expect(page.locator('#contacto .nombre')).toBeInViewport();
+  });
+
+  test('"Obras" del menú lleva a la grilla, también desde una ficha', async ({ page }) => {
+    await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
+    await abrirMenu(page);
+    await menu(page).getByRole('link', { name: 'Obras' }).click();
+    await expect(page).toHaveURL('/#obras');
+    await expect(page.locator('#obras')).toBeInViewport();
+  });
+
+  test('el menú lista las redes, se abre con teclado y se cierra con Escape devolviendo el foco', async ({ page }) => {
+    await page.goto('/');
+    const boton = page.getByRole('button', { name: 'Menú' });
+    await boton.focus();
+    await page.keyboard.press('Enter');
+    await expect(menu(page)).toBeVisible();
+    for (const red of ['Instagram', 'Facebook']) {
+      await expect(menu(page).getByRole('link', { name: red })).toBeVisible();
+    }
+    await page.keyboard.press('Escape');
+    await expect(menu(page)).toBeHidden();
+    await expect(boton).toBeFocused();
+  });
+});
+
 test.describe('ficha de obra', () => {
-  test('se llega desde la grilla y muestra título, ubicación y las diez fotos', async ({ page }) => {
+  test('se llega desde la grilla y muestra título, ubicación y todas sus fotos', async ({ page }) => {
     await page.goto('/');
     await page.locator('.grilla a').first().click();
     await expect(page).toHaveURL(`/obras/${PRIMERA_OBRA.slug}/`);
     await expect(page).toHaveTitle(`${PRIMERA_OBRA.nombre} · Bueno Valdivia Arquitectos`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(PRIMERA_OBRA.nombre);
-    await expect(page.locator('.ubicacion')).toHaveText('Colina, Región Metropolitana');
+    await expect(page.locator('.ubicacion')).not.toBeEmpty();
 
     const fotos = page.locator('.fotos img');
-    await expect(fotos).toHaveCount(10);
-    const archivos = await fotos.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')!.split('/').pop()!));
-    expect(archivos.slice(0, 5).every((a) => a.startsWith('exterior-'))).toBe(true);
-    expect(archivos.slice(5).every((a) => a.startsWith('interior-'))).toBe(true);
+    await expect(fotos).toHaveCount(PRIMERA_OBRA.fotos);
+    const archivos = await fotos.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')!.split('/').pop()!.split('.')[0]!));
+    // El orden de la ficha es el de los nombres: foto-01, foto-02…
+    expect(archivos).toEqual(Array.from({ length: PRIMERA_OBRA.fotos }, (_, i) => `foto-${String(i + 1).padStart(2, '0')}`));
     for (const foto of await fotos.all()) {
       await expect(foto).toHaveAttribute('alt', PRIMERA_OBRA.nombre);
       await expect(foto).toHaveAttribute('width', /\d+/);
@@ -200,7 +246,7 @@ test.describe('ficha de obra', () => {
   test('"Siguiente obra" recorre el catálogo y vuelve al inicio desde la última', async ({ page }) => {
     await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
     await page.locator('.siguiente').click();
-    await expect(page).toHaveURL('/obras/casa-la-quebrada/');
+    await expect(page).toHaveURL(`/obras/${SEGUNDA_OBRA.slug}/`);
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
 
     await page.goto(`/obras/${ULTIMA_OBRA.slug}/`);
@@ -223,7 +269,7 @@ test.describe('ficha de obra', () => {
     const enlace = new URL((await boton.getAttribute('href'))!);
     expect(enlace.origin + enlace.pathname).toBe('https://wa.me/56900000000');
     expect(enlace.searchParams.get('text')).toBe(
-      'Hola, vi el proyecto Edificio Los Leones en su portafolio y me gustaría conversar.',
+      `Hola, vi el proyecto ${ULTIMA_OBRA.nombre} en su portafolio y me gustaría conversar.`,
     );
   });
 });
@@ -263,7 +309,8 @@ test.describe('contacto', () => {
 
     test(`"Contacto" en la cabecera de ${ruta} baja al pie sin cambiar de página`, async ({ page }) => {
       await page.goto(ruta);
-      await page.locator('.cabecera').getByRole('link', { name: 'Contacto' }).click();
+      await abrirMenu(page);
+      await menu(page).getByRole('link', { name: 'Contacto' }).click();
       await expect(page).toHaveURL(`${ruta}#contacto`);
       await expect(page.locator('#contacto .nombre')).toBeInViewport();
     });
@@ -342,7 +389,7 @@ test.describe('estructura del sitio', () => {
   test('los enlaces de navegación miden al menos 44 px de alto', async ({ page }) => {
     const alto = async (selector: string) => (await page.locator(selector).first().boundingBox())!.height;
     await page.goto('/');
-    for (const selector of ['.cabecera .contacto', '[data-filtro]', '[data-siguiente]', '#contacto .redes a']) {
+    for (const selector of ['.boton-menu', '.cabecera .logo', '[data-filtro]', '#contacto .redes a']) {
       expect(await alto(selector), selector).toBeGreaterThanOrEqual(44);
     }
     await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);

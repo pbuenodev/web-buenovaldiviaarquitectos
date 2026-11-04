@@ -1,0 +1,9 @@
+nombre: "Casa en El San Cristóbal"
+ciudad: "Por confirmar" # PREGUNTA ABIERTA
+ubicacion: "Por confirmar" # PREGUNTA ABIERTA
+categoria: casas
+orden: 10
+portada: foto-01
+carrusel:
+  foto: foto-01
+  orden: 3

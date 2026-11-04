@@ -1,8 +1,7 @@
 ---
-import Carrusel from '../components/Carrusel.astro';
 import Filtros from '../components/Filtros.astro';
 import GrillaObras from '../components/GrillaObras.astro';
-import { sitio } from '../config/site';
+import Portada from '../components/Portada.astro';
 import Base from '../layouts/Base.astro';
 import { obtenerLaminas, obtenerObras } from '../lib/obras';
 
@@ -10,10 +9,9 @@ const obras = await obtenerObras();
 const laminas = await obtenerLaminas();
 ---
 
-<Base imagen={laminas[0]!.foto.imagen}>
-  <h1 class="solo-lectores">{sitio.nombre}</h1>
-  <Carrusel laminas={laminas} />
-  <main class="obras">
+<Base imagen={laminas[0]!.foto.imagen} cabecera="sobre-foto">
+  <Portada laminas={laminas} />
+  <main id="obras" class="obras">
     <h2 class="solo-lectores">Obras</h2>
     <Filtros />
     <GrillaObras obras={obras} />

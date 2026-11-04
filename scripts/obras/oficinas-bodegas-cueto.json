@@ -1,0 +1,11 @@
+{
+  "origen": "11-oficinas-bodegas-cueto",
+  "nombre": "Oficinas y Bodegas Cueto",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

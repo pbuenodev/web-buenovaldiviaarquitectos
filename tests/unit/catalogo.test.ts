@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   armarCatalogo,
+  CATEGORIAS,
   esAngosta,
   laminasCarrusel,
   obraSiguiente,
@@ -84,6 +85,20 @@ describe('armarCatalogo', () => {
         new Map([['a', diez]]),
       ),
     ).toThrow(/Slug repetido.*"a"/);
+  });
+});
+
+describe('categorías', () => {
+  it('rotula las tres categorías', () => {
+    expect(CATEGORIAS).toEqual({ casas: 'Casas', edificios: 'Edificios', comercial: 'Comercial' });
+  });
+
+  it('acepta una obra comercial en el catálogo', () => {
+    const [obra] = armarCatalogo(
+      [{ slug: 'a', datos: datos({ categoria: 'comercial' }) }],
+      new Map([['a', fotos('exterior-01.webp')]]),
+    );
+    expect(obra!.categoria).toBe('comercial');
   });
 });
 
