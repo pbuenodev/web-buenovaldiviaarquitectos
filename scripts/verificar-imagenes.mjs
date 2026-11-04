@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 // Falla si alguna imagen AVIF generada en dist/ supera el peso máximo.
-// Uso: node scripts/verificar-imagenes.mjs [límite en KB]   (por defecto 300)
+// Las de hasta 1600 px de ancho tienen el límite base; las más anchas (solo el carrusel) tienen uno mayor.
+// Uso: node scripts/verificar-imagenes.mjs [límite en KB] [límite para > 1600 px en KB]   (por defecto 300 y 400)
 import { readdir, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import sharp from 'sharp';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
 const limiteKB = Number(process.argv[2] ?? 300);
+const limiteAnchasKB = Number(process.argv[3] ?? 400);
+const ANCHO_BASE = 1600;
 
 async function* archivos(carpeta) {
   for (const entrada of await readdir(carpeta, { withFileTypes: true })) {
@@ -24,7 +28,9 @@ try {
     total++;
     const kb = (await stat(ruta)).size / 1024;
     mayor = Math.max(mayor, kb);
-    if (kb > limiteKB) excedidas.push([relative(DIST, ruta), kb]);
+    const { width } = await sharp(ruta).metadata();
+    const limite = width > ANCHO_BASE ? limiteAnchasKB : limiteKB;
+    if (kb > limite) excedidas.push([relative(DIST, ruta), kb, width, limite]);
   }
 } catch (error) {
   if (error.code === 'ENOENT') {
@@ -40,9 +46,11 @@ if (total === 0) {
 }
 
 if (excedidas.length > 0) {
-  console.error(`${excedidas.length} de ${total} imágenes AVIF superan los ${limiteKB} KB:`);
-  for (const [ruta, kb] of excedidas.sort((a, b) => b[1] - a[1])) console.error(`  ${kb.toFixed(0)} KB  ${ruta}`);
+  console.error(`${excedidas.length} de ${total} imágenes AVIF superan su límite:`);
+  for (const [ruta, kb, ancho, limite] of excedidas.sort((a, b) => b[1] - a[1])) {
+    console.error(`  ${kb.toFixed(0)} KB (límite ${limite} KB, ${ancho} px)  ${ruta}`);
+  }
   process.exit(1);
 }
 
-console.log(`${total} imágenes AVIF, la mayor de ${mayor.toFixed(0)} KB (límite ${limiteKB} KB).`);
+console.log(`${total} imágenes AVIF, la mayor de ${mayor.toFixed(0)} KB (límite ${limiteKB} KB hasta ${ANCHO_BASE} px, ${limiteAnchasKB} KB más anchas).`);

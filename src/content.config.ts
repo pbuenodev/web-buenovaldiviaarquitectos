@@ -14,7 +14,7 @@ const obras = defineCollection({
     nombre: z.string().min(1),
     ciudad: z.string().min(1),
     ubicacion: z.string().min(1),
-    categoria: z.enum(['casas', 'edificios']),
+    categoria: z.enum(['casas', 'edificios', 'comercial']),
     orden: z.number().int(),
     portada: z.string().min(1).optional(),
     carrusel: z

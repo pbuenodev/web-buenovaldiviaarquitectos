@@ -1,0 +1,11 @@
+{
+  "origen": "14-colegio-charles-school",
+  "nombre": "Colegio Charles School",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "edificios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

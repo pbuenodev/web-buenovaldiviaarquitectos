@@ -1,0 +1,11 @@
+{
+  "origen": "09-local-sebastopol",
+  "nombre": "Local Sebastopol",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

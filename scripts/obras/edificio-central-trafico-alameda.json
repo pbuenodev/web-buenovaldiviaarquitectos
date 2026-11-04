@@ -1,0 +1,14 @@
+{
+  "origen": "06-edificio-central-trafico-alameda",
+  "nombre": "Edificio Central Tráfico Alameda",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "edificios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "carrusel": {
+    "orden": 2
+  }
+}

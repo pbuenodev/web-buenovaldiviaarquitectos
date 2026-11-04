@@ -1,0 +1,14 @@
+{
+  "origen": "10-casa-san-cristobal",
+  "nombre": "Casa en El San Cristóbal",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "carrusel": {
+    "orden": 3
+  }
+}

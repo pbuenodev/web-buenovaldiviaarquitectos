@@ -1,0 +1,11 @@
+{
+  "origen": "13-casa-foresta-zapallar",
+  "nombre": "Casa en La Foresta de Zapallar",
+  "ciudad": "Zapallar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

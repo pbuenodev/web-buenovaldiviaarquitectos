@@ -1,0 +1,11 @@
+{
+  "origen": "12-pub-los-amigos",
+  "nombre": "Pub Los Amigos",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

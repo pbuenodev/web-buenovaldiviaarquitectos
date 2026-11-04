@@ -1,0 +1,11 @@
+{
+  "origen": "02-bosque-golf-el-condominio",
+  "nombre": "Bosque Golf, El Condominio",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

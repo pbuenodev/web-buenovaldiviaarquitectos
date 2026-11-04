@@ -1,8 +1,6 @@
-nombre: Edificio Panamericana
-ciudad: Las Condes
-ubicacion: Las Condes, Santiago
+nombre: "Edificio Panamericana"
+ciudad: "Por confirmar" # PREGUNTA ABIERTA
+ubicacion: "Por confirmar" # PREGUNTA ABIERTA
 categoria: edificios
-orden: 5
-carrusel:
-  foto: exterior-02
-  orden: 4
+orden: 7
+portada: foto-01

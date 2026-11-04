@@ -11,17 +11,20 @@ interface Props {
   sizes: string;
   /** Carga inmediata y con prioridad. Solo para la primera lámina del carrusel. */
   prioritaria?: boolean;
+  /** Ancho máximo que se genera. Solo el carrusel, a pantalla completa, lo sube de 1600. */
+  anchoMaximo?: number;
   /** Deja las fuentes en atributos `data-` para que un script las active más tarde. */
   aplazada?: boolean;
   class?: string;
 }
 
-const ANCHOS = [480, 800, 1200, 1600, 2000];
-const CALIDAD = { avif: 55, webp: 72 } as const;
+const ANCHOS = [480, 800, 1200, 1600, 2000, 2560];
+const ANCHO_MAXIMO = 1600;
+const CALIDAD = { avif: 50, webp: 72 } as const;
 
-const { src, alt, sizes, prioritaria = false, aplazada = false, class: clase } = Astro.props;
+const { src, alt, sizes, prioritaria = false, anchoMaximo = ANCHO_MAXIMO, aplazada = false, class: clase } = Astro.props;
 
-const mayor = Math.min(src.width, ANCHOS.at(-1)!);
+const mayor = Math.min(src.width, anchoMaximo);
 const anchos = [...new Set([...ANCHOS.filter((ancho) => ancho < mayor), mayor])];
 
 const [avif, webp] = await Promise.all(

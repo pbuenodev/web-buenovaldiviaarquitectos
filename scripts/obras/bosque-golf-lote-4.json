@@ -1,0 +1,11 @@
+{
+  "origen": "03-bosque-golf-lote-4",
+  "nombre": "Bosque Golf, Lote 4",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}

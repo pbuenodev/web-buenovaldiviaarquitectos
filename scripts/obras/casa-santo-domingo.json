@@ -1,0 +1,11 @@
+{
+  "origen": "08-casa-santo-domingo",
+  "nombre": "Casa en Santo Domingo",
+  "ciudad": "Santo Domingo",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ]
+}
