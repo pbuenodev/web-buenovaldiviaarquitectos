@@ -13,9 +13,11 @@ interface Props {
   descripcion?: string;
   /** Fotografía de la tarjeta que se ve al compartir el enlace. */
   imagen: ImageMetadata;
+  /** En el inicio la cabecera va superpuesta a la portada. */
+  cabecera?: 'solida' | 'sobre-foto';
 }
 
-const { titulo, descripcion = sitio.descripcion, imagen } = Astro.props;
+const { titulo, descripcion = sitio.descripcion, imagen, cabecera = 'solida' } = Astro.props;
 const tituloCompleto = titulo ? `${titulo} · ${sitio.nombre}` : sitio.nombre;
 
 // WhatsApp no muestra de forma fiable AVIF ni WebP en sus tarjetas: se genera un JPEG.
@@ -55,7 +57,7 @@ const indexable = import.meta.env.PUBLIC_INDEXABLE === 'true';
     </script>
   </head>
   <body>
-    <Cabecera />
+    <Cabecera sobreFoto={cabecera === 'sobre-foto'} />
     <slot />
     <Pie />
   </body>
