@@ -10,9 +10,18 @@ interface Props {
 }
 
 const { laminas, segundos = 5 } = Astro.props;
+/** Milisegundos del fundido entre fotografías; el script lo usa para saber cuándo termina. */
+const fundido = 1800;
 ---
 
-<section class="portada" aria-label="Portada" data-portada data-segundos={segundos}>
+<section
+  class="portada"
+  aria-label="Portada"
+  data-portada
+  data-segundos={segundos}
+  data-fundido={fundido}
+  style={`--fundido: ${fundido}ms`}
+>
   {
     laminas.map(({ obra, foto }, i) => (
       <div class="lamina" data-lamina data-activa={i === 0 ? '' : undefined} aria-hidden={i === 0 ? 'false' : 'true'}>
@@ -57,7 +66,7 @@ const { laminas, segundos = 5 } = Astro.props;
     position: absolute;
     inset: 0;
     opacity: 0;
-    transition: opacity 1.8s ease-in-out;
+    transition: opacity var(--fundido) ease-in-out;
   }
 
   .lamina[data-activa] {
@@ -70,15 +79,37 @@ const { laminas, segundos = 5 } = Astro.props;
     height: 100%;
   }
 
+  /* Sin `data-acercar` la foto vuelve en el acto a su tamaño: solo ocurre cuando ya es invisible. */
   .lamina :global(img) {
     object-fit: cover;
+    transform-origin: center;
   }
 
-  /* Un azul uniforme junta los tonos de las fotos; el degradado sostiene el título. */
+  /* Acercamiento lento hacia el proyecto. Dura más que los 6,8 s que la foto se ve,
+     así que nunca se la ve detenerse; el script lo mantiene durante el fundido de salida.
+     Es una animación y no una transición para que arranque siempre desde la escala 1,
+     también en la primera foto, que se acerca antes de que la página termine de pintarse. */
+  .lamina[data-acercar] :global(img) {
+    animation: acercar 7s linear forwards;
+    will-change: transform;
+  }
+
+  @keyframes acercar {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.08);
+    }
+  }
+
+  /* Un azul uniforme junta los tonos de las fotos; el degradado inferior sostiene el título y el
+     superior, largo y suave, el logo sobre cielos casi blancos (sin marcar la franja de la cabecera). */
   .velo {
     position: absolute;
     inset: 0;
     background:
+      linear-gradient(180deg, rgb(13 24 40 / 0.4) 0, rgb(13 24 40 / 0.2) 12%, rgb(13 24 40 / 0) 28%),
       linear-gradient(180deg, rgb(13 24 40 / 0) 40%, rgb(13 24 40 / 0.55) 100%),
       rgb(13 24 40 / 0.4);
   }
@@ -138,6 +169,10 @@ const { laminas, segundos = 5 } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     .lamina {
       transition: none;
+    }
+
+    .lamina[data-acercar] :global(img) {
+      animation: none;
     }
   }
 </style>

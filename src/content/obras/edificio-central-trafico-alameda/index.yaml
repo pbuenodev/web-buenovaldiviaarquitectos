@@ -3,7 +3,7 @@ ciudad: "Por confirmar" # PREGUNTA ABIERTA
 ubicacion: "Por confirmar" # PREGUNTA ABIERTA
 categoria: edificios
 orden: 6
-portada: foto-03
+portada: foto-01
 carrusel:
-  foto: foto-03
+  foto: foto-01
   orden: 2
