@@ -44,6 +44,7 @@ function yamlObra(m, orden, portada, carrusel) {
     `portada: ${portada}`,
   ];
   if (carrusel) lineas.push('carrusel:', `  foto: ${portada}`, `  orden: ${carrusel.orden}`);
+  if (m.album) lineas.push(`album: ${m.album}`);
   return lineas.join('\n') + '\n';
 }
 
@@ -56,7 +57,9 @@ export async function importarObra(slug, { entrega, destino, manifiestos }) {
   if (!partes || partes[2] !== slug) {
     throw new Error(`${slug}: "origen" debe ser NN-${slug} (hay "${m.origen}")`);
   }
-  const orden = Number(partes[1]);
+  // El manifiesto puede fijar el orden, p. ej. para ordenar los lotes de un álbum por su número.
+  if (m.orden !== undefined && !Number.isInteger(m.orden)) throw new Error(`${slug}: "orden" debe ser un entero`);
+  const orden = m.orden ?? Number(partes[1]);
   const origen = join(entrega, m.origen);
   if (!(await existe(origen))) throw new Error(`${slug}: no existe la carpeta ${m.origen}`);
 

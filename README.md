@@ -61,13 +61,16 @@ No hace falta tocar código: se añade una carpeta y el sitio hace el resto.
    nombre: Casa La Quebrada
    ciudad: Viña del Mar # se ve en la grilla
    ubicacion: Viña del Mar, Valparaíso # se ve en la ficha
-   categoria: casas # casas | edificios | comercial
+   categoria: casas # casas | edificios | comercial | colegios
    orden: 2 # posición en la grilla y en "Siguiente obra"
    portada: foto-02 # opcional; por defecto, la primera foto
    carrusel: # opcional; sin esto la obra no entra al hero del inicio (el campo se llama así por historia)
      foto: foto-03
      orden: 1 # posición de la lámina
+   album: bosque-golf-el-condominio # opcional; la obra va dentro del álbum de esa obra (ver abajo)
    ```
+
+   Una obra con `album` no aparece en la grilla del inicio: se ve en el bloque «Lotes» de la ficha de la obra madre, ordenada por su `orden` entre sus hermanas, y su «Siguiente obra» recorre solo las obras de ese álbum. Los álbumes tienen un solo nivel.
 
 4. Ejecutar `pnpm build`. Si falta un dato, la categoría no existe, la carpeta no tiene fotos o `portada` / `carrusel.foto` nombran un archivo que no está, el build falla y dice qué obra y qué dato corregir.
 
@@ -88,7 +91,7 @@ El cliente entrega una carpeta curada, `~/Descargas/Seleccion Portafolio` (fuera
 - La foto que lleva `FAVORITA` (`<slug>-03FAVORITA.webp`) es la portada de la obra. Debe haber exactamente una por obra.
 - `reescaladas/` puede traer una versión ampliada de una foto con el mismo nombre; si existe, se usa en su lugar.
 
-Los datos que no vienen de la carpeta están en `scripts/obras/<slug>.json`: `origen` (la carpeta `NN-<slug>`), `nombre`, `categoria`, `ciudad`, `ubicacion`, `pendientes` (los datos aún por confirmar se dejan como `Por confirmar` y salen marcados con `# PREGUNTA ABIERTA` en el `index.yaml`) y, si la obra va en el carrusel, `carrusel: { "orden": N }` (la foto es la favorita).
+Los datos que no vienen de la carpeta están en `scripts/obras/<slug>.json`: `origen` (la carpeta `NN-<slug>`), `nombre`, `categoria`, `ciudad`, `ubicacion`, `pendientes` (los datos aún por confirmar se dejan como `Por confirmar` y salen marcados con `# PREGUNTA ABIERTA` en el `index.yaml`); si la obra va en el carrusel, `carrusel: { "orden": N }` (la foto es la favorita); si va dentro del álbum de otra obra, `album: "<slug>"`; y, opcionalmente, `orden: N` para fijar el orden en lugar del `NN` de la carpeta (los lotes de Bosque Golf lo usan para quedar de L1 a L5).
 
 ```sh
 pnpm importar                              # todas las obras

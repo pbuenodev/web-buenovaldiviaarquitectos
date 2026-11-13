@@ -5,6 +5,8 @@ export const sitio = {
   nombre: 'Bueno Valdivia Arquitectos',
   descripcion: 'Portafolio de obras de Bueno Valdivia Arquitectos. Chile, más de 30 años de trayectoria.',
   lema: 'Chile · Más de 30 años',
+  // Se listan bajo el nombre de la oficina en la portada del inicio.
+  integrantes: ['Pablo A. Bueno Orellana', 'Teresa Y. Valdivia Ponce', 'Bruno A. Bueno Valdivia'],
   whatsapp: {
     numero: '+56 9 0000 0000',
     mensajeGeneral: 'Hola, vi su portafolio y me gustaría conversar sobre un proyecto.',

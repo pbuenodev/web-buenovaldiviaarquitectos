@@ -4,6 +4,8 @@ import {
   CATEGORIAS,
   esAngosta,
   laminasCarrusel,
+  obrasDeLaGrilla,
+  obrasDelAlbum,
   obraSiguiente,
   type DatosObra,
   type FotoObra,
@@ -89,8 +91,8 @@ describe('armarCatalogo', () => {
 });
 
 describe('categorías', () => {
-  it('rotula las tres categorías', () => {
-    expect(CATEGORIAS).toEqual({ casas: 'Casas', edificios: 'Edificios', comercial: 'Comercial' });
+  it('rotula las cuatro categorías', () => {
+    expect(CATEGORIAS).toEqual({ casas: 'Casas', edificios: 'Edificios', comercial: 'Comercial', colegios: 'Colegios' });
   });
 
   it('acepta una obra comercial en el catálogo', () => {
@@ -99,6 +101,61 @@ describe('categorías', () => {
       new Map([['a', fotos('exterior-01.webp')]]),
     );
     expect(obra!.categoria).toBe('comercial');
+  });
+});
+
+describe('álbumes', () => {
+  const foto = new Map(['madre', 'l1', 'l2', 'l4', 'otra'].map((slug) => [slug, fotos('foto-01.webp')]));
+
+  const condominio = () =>
+    armarCatalogo(
+      [
+        { slug: 'l4', datos: datos({ orden: 4, album: 'madre' }) },
+        { slug: 'madre', datos: datos({ orden: 2 }) },
+        { slug: 'l1', datos: datos({ orden: 1, album: 'madre' }) },
+        { slug: 'otra', datos: datos({ orden: 3 }) },
+        { slug: 'l2', datos: datos({ orden: 2, album: 'madre' }) },
+      ],
+      foto,
+    );
+
+  it('las obras de un álbum siguen en el catálogo, pero no en la grilla', () => {
+    const obras = condominio();
+    expect(obras).toHaveLength(5);
+    expect(obrasDeLaGrilla(obras).map((o) => o.slug)).toEqual(['madre', 'otra']);
+  });
+
+  it('lista las obras del álbum en su orden', () => {
+    expect(obrasDelAlbum(condominio(), 'madre').map((o) => o.slug)).toEqual(['l1', 'l2', 'l4']);
+    expect(obrasDelAlbum(condominio(), 'otra')).toEqual([]);
+  });
+
+  it('"siguiente" recorre las hermanas y vuelve a la primera', () => {
+    const hermanas = obrasDelAlbum(condominio(), 'madre');
+    expect(obraSiguiente(hermanas, 'l1').slug).toBe('l2');
+    expect(obraSiguiente(hermanas, 'l4').slug).toBe('l1');
+    expect(obraSiguiente(obrasDeLaGrilla(condominio()), 'otra').slug).toBe('madre');
+  });
+
+  it('falla si el álbum no existe', () => {
+    expect(() => armarCatalogo([{ slug: 'l1', datos: datos({ album: 'nadie' }) }], foto)).toThrow(/"l1".*"nadie"/);
+  });
+
+  it('falla si una obra está en su propio álbum', () => {
+    expect(() => armarCatalogo([{ slug: 'l1', datos: datos({ album: 'l1' }) }], foto)).toThrow(/"l1".*propio álbum/);
+  });
+
+  it('falla si los álbumes se anidan', () => {
+    expect(() =>
+      armarCatalogo(
+        [
+          { slug: 'madre', datos: datos() },
+          { slug: 'l1', datos: datos({ album: 'madre' }) },
+          { slug: 'l2', datos: datos({ album: 'l1' }) },
+        ],
+        foto,
+      ),
+    ).toThrow(/"l2".*"l1".*"madre"/);
   });
 });
 

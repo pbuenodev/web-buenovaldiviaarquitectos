@@ -1,4 +1,5 @@
 ---
+import { sitio } from '../config/site';
 import type { LaminaDelSitio } from '../lib/obras';
 import Foto from './Foto.astro';
 
@@ -22,7 +23,12 @@ const { laminas, segundos = 5 } = Astro.props;
   }
   <div class="velo"></div>
 
-  <h1 class="titular marca">Bueno Valdivia<br />Arquitectos</h1>
+  <div class="marca">
+    <h1 class="titular nombre">Bueno Valdivia<br /><span class="sub">Arquitectos</span></h1>
+    <ul class="rotulo integrantes">
+      {sitio.integrantes.map((integrante) => <li>{integrante}</li>)}
+    </ul>
+  </div>
 
   <a href="#obras" class="bajar" aria-label="Ver las obras">
     <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
@@ -77,14 +83,45 @@ const { laminas, segundos = 5 } = Astro.props;
       rgb(13 24 40 / 0.4);
   }
 
+  /* Anclado abajo, donde el degradado del velo es más oscuro. */
   .marca {
     position: absolute;
     inset: auto 0 12svh;
-    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
     padding: 0 var(--margen);
-    font-size: var(--titulo-xl);
-    line-height: 0.95;
     text-align: center;
+  }
+
+  .nombre {
+    font-size: var(--titulo-l);
+    line-height: 0.95;
+  }
+
+  /* "Arquitectos" a la mitad de "Bueno Valdivia". */
+  .sub {
+    display: block;
+    margin-top: 0.2em;
+    font-size: 0.5em;
+  }
+
+  .integrantes {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    /* Texto pequeño sobre fotografía: el halo azul asegura 4,5:1 aunque caiga sobre una zona clara. */
+    text-shadow: 0 0 10px rgb(13 24 40 / 0.6);
+  }
+
+  @media (min-width: 720px) {
+    .marca {
+      gap: 28px;
+    }
   }
 
   .bajar {

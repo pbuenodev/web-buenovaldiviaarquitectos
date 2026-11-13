@@ -3,7 +3,7 @@
   "nombre": "Colegio Charles School",
   "ciudad": "Por confirmar",
   "ubicacion": "Por confirmar",
-  "categoria": "edificios",
+  "categoria": "colegios",
   "pendientes": [
     "ciudad",
     "ubicacion"

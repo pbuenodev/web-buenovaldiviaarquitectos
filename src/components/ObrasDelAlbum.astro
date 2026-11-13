@@ -1,0 +1,41 @@
+---
+import type { ObraDelSitio } from '../lib/obras';
+import GrillaObras from './GrillaObras.astro';
+
+interface Props {
+  /** Obras dentro del álbum de la ficha (los lotes de un condominio). */
+  obras: ObraDelSitio[];
+}
+
+const { obras } = Astro.props;
+---
+
+<section class="album" aria-labelledby="titulo-album">
+  <h2 id="titulo-album" class="rotulo titulo">Lotes</h2>
+  <GrillaObras obras={obras} />
+</section>
+
+<style>
+  .album {
+    max-width: var(--ancho-fotos);
+    margin: 72px auto 0;
+  }
+
+  .titulo {
+    margin: 0 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgb(13 24 40 / 0.18);
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  @media (min-width: 720px) {
+    .album {
+      margin-top: 140px;
+    }
+
+    .titulo {
+      margin-bottom: 32px;
+    }
+  }
+</style>

@@ -14,7 +14,7 @@ const obras = defineCollection({
     nombre: z.string().min(1),
     ciudad: z.string().min(1),
     ubicacion: z.string().min(1),
-    categoria: z.enum(['casas', 'edificios', 'comercial']),
+    categoria: z.enum(['casas', 'edificios', 'comercial', 'colegios']),
     orden: z.number().int(),
     portada: z.string().min(1).optional(),
     carrusel: z
@@ -23,6 +23,8 @@ const obras = defineCollection({
         orden: z.number().int(),
       })
       .optional(),
+    // Slug de la obra en cuyo álbum va esta (un lote dentro de su condominio).
+    album: z.string().min(1).optional(),
   }),
 });
 
