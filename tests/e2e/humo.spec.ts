@@ -3,16 +3,20 @@ import { expect, test, type Page } from '@playwright/test';
 // Prueba de humo del sitio construido. Se ejecuta en teléfono (390 px) y escritorio (1440 px).
 // Los nombres y cantidades corresponden a las obras cargadas en `src/content/obras/`.
 
-const OBRAS = 14; // obras en la grilla
+const OBRAS = 10; // obras en la grilla (los lotes de Bosque Golf van dentro del condominio)
 const LAMINAS = 3; // obras que participan en el hero
-const CASAS = 8;
-const EDIFICIOS = 3;
+const CASAS = 4;
+const EDIFICIOS = 2;
 const COMERCIAL = 3;
-const PRIMERA_OBRA = { slug: 'bosque-golf-lote-5', nombre: 'Bosque Golf, Lote 5', fotos: 10 };
-const SEGUNDA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio' };
+const COLEGIOS = 1;
+const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 9 };
+const SEGUNDA_OBRA = { slug: 'edificio-central-trafico-alameda', nombre: 'Edificio Central Tráfico Alameda' };
 const ULTIMA_OBRA = { slug: 'colegio-charles-school', nombre: 'Colegio Charles School' };
-// Primera foto de la portada (orden 1).
-const LAMINA_1 = PRIMERA_OBRA.nombre;
+// Lotes del álbum del condominio, en su orden.
+const LOTES = [1, 2, 4, 5].map((n) => ({ slug: `bosque-golf-lote-${n}`, nombre: `Bosque Golf, Lote ${n}` }));
+// Primera foto de la portada (orden 1): el Lote 5, que está en el carrusel aunque no en la grilla.
+const LAMINA_1 = 'Bosque Golf, Lote 5';
+const INTEGRANTES = ['Pablo A. Bueno Orellana', 'Teresa Y. Valdivia Ponce', 'Bruno A. Bueno Valdivia'];
 const NOMBRE_OFICINA = 'Bueno Valdivia Arquitectos';
 
 const laminaActiva = (page: Page) => page.locator('[data-lamina][data-activa] img');
@@ -41,6 +45,33 @@ test.describe('inicio', () => {
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
     await expect(page.locator('.grilla li').first()).toContainText(PRIMERA_OBRA.nombre);
     await sinDesbordeHorizontal(page);
+  });
+
+  test('el nombre va en dos tamaños y bajo él, más pequeños, los integrantes', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { level: 1, name: NOMBRE_OFICINA, exact: true })).toBeVisible();
+    const integrantes = page.locator('[data-portada] .integrantes li');
+    await expect(integrantes).toHaveText(INTEGRANTES.map((n) => new RegExp(n.replace('.', '\\.'), 'i')));
+    await expect(page.getByRole('heading', { level: 1 })).not.toContainText(/Pablo|Teresa|Bruno/i);
+
+    const tamano = (selector: string) => page.locator(selector).evaluate((e) => parseFloat(getComputedStyle(e).fontSize));
+    const [nombre, sub, integrante] = [await tamano('[data-portada] h1'), await tamano('[data-portada] h1 .sub'), await tamano('[data-portada] .integrantes')];
+    expect(nombre).toBeLessThanOrEqual(88);
+    expect(sub).toBeLessThan(nombre);
+    expect(integrante).toBeLessThan(sub);
+
+    const caja = (selector: string) => page.locator(selector).boundingBox().then((c) => c!);
+    const [titulo, lista] = [await caja('[data-portada] h1'), await caja('[data-portada] .integrantes')];
+    expect(lista.y, 'los integrantes van bajo el nombre').toBeGreaterThanOrEqual(titulo.y + titulo.height);
+    await sinDesbordeHorizontal(page);
+  });
+
+  test('la grilla muestra el condominio y ninguno de sus lotes', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.grilla')).toContainText(PRIMERA_OBRA.nombre);
+    for (const lote of LOTES) {
+      await expect(page.locator(`.grilla a[href="/obras/${lote.slug}/"]`)).toHaveCount(0);
+    }
   });
 
   test('la portada no tiene botones, contador ni enlace a una obra', async ({ page }) => {
@@ -117,6 +148,11 @@ test.describe('inicio', () => {
     await filtro('Comercial').click();
     await expect(tarjetasVisibles(page)).toHaveCount(COMERCIAL);
     await expect(filtro('Comercial')).toHaveAttribute('aria-pressed', 'true');
+
+    await filtro('Colegios').click();
+    await expect(tarjetasVisibles(page)).toHaveCount(COLEGIOS);
+    await expect(tarjetasVisibles(page)).toContainText('Colegio Charles School');
+    await expect(filtro('Colegios')).toHaveAttribute('aria-pressed', 'true');
 
     await filtro('Todas').click();
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
@@ -253,6 +289,77 @@ test.describe('ficha de obra', () => {
     await expect(page.locator('.siguiente')).toContainText(PRIMERA_OBRA.nombre);
     await page.locator('.siguiente').click();
     await expect(page).toHaveURL(`/obras/${PRIMERA_OBRA.slug}/`);
+  });
+
+  test('el recorrido de "Siguiente obra" pasa por toda la grilla y por ningún lote', async ({ page }) => {
+    await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
+    const visitadas = [PRIMERA_OBRA.slug];
+    for (let i = 0; i < OBRAS; i++) {
+      await page.locator('.siguiente').click();
+      visitadas.push(new URL(page.url()).pathname.split('/')[2]!);
+    }
+    expect(visitadas.at(-1), 'vuelve a la primera').toBe(PRIMERA_OBRA.slug);
+    expect(new Set(visitadas).size).toBe(OBRAS);
+    expect(visitadas.some((slug) => slug.includes('-lote-'))).toBe(false);
+  });
+
+  test('la ficha del condominio lista sus lotes en orden y enlaza a cada uno', async ({ page }) => {
+    await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
+    const album = page.getByRole('region', { name: 'Lotes' });
+    const tarjetas = album.locator('li');
+    await expect(tarjetas).toHaveCount(LOTES.length);
+    for (const [i, lote] of LOTES.entries()) {
+      await expect(tarjetas.nth(i)).toContainText(lote.nombre);
+    }
+    // El bloque va entre las fotos y "Siguiente obra".
+    const [fotos, bloque, siguiente] = [
+      (await page.locator('.fotos').boundingBox())!,
+      (await album.boundingBox())!,
+      (await page.locator('.siguiente').boundingBox())!,
+    ];
+    expect(bloque.y).toBeGreaterThanOrEqual(fotos.y + fotos.height);
+    expect(siguiente.y).toBeGreaterThanOrEqual(bloque.y + bloque.height);
+    await sinDesbordeHorizontal(page);
+
+    await album.getByRole('link', { name: LOTES[2]!.nombre }).click();
+    await expect(page).toHaveURL(`/obras/${LOTES[2]!.slug}/`);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(LOTES[2]!.nombre);
+  });
+
+  test('las tarjetas de los lotes van en 2 columnas en teléfono y 3 en escritorio', async ({ page, isMobile }) => {
+    await page.goto(`/obras/${PRIMERA_OBRA.slug}/`);
+    const tarjetas = page.locator('.album li');
+    const ys = await tarjetas.evaluateAll((lis) => lis.map((li) => Math.round(li.getBoundingClientRect().top)));
+    expect(ys.filter((y) => y === ys[0]).length).toBe(isMobile ? 2 : 3);
+  });
+
+  test('una ficha sin álbum no muestra el bloque de lotes', async ({ page }) => {
+    await page.goto('/obras/pub-los-amigos/');
+    await expect(page.locator('.album')).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Lotes' })).toHaveCount(0);
+  });
+
+  test('un lote vuelve a su condominio y "Siguiente obra" recorre solo los lotes', async ({ page }) => {
+    await page.goto(`/obras/${LOTES[0]!.slug}/`);
+    await expect(page.getByRole('link', { name: '← Obras' })).toHaveCount(0);
+    await expect(page.locator('.siguiente')).toContainText(LOTES[1]!.nombre);
+
+    await page.goto(`/obras/${LOTES.at(-1)!.slug}/`);
+    await expect(page.locator('.siguiente')).toContainText(LOTES[0]!.nombre);
+
+    await page.getByRole('link', { name: `← ${PRIMERA_OBRA.nombre}` }).click();
+    await expect(page).toHaveURL(`/obras/${PRIMERA_OBRA.slug}/`);
+  });
+
+  test('el título de la ficha mide como máximo 64 px y cabe en dos líneas', async ({ page }) => {
+    await page.goto(`/obras/${SEGUNDA_OBRA.slug}/`);
+    const titulo = page.getByRole('heading', { level: 1 });
+    const { tamano, alto, linea } = await titulo.evaluate((e) => {
+      const estilo = getComputedStyle(e);
+      return { tamano: parseFloat(estilo.fontSize), alto: e.getBoundingClientRect().height, linea: parseFloat(estilo.lineHeight) };
+    });
+    expect(tamano).toBeLessThanOrEqual(64);
+    expect(Math.round(alto / linea)).toBeLessThanOrEqual(2);
   });
 
   test('"← Obras" vuelve al inicio', async ({ page }) => {

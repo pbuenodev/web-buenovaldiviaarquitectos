@@ -4,6 +4,7 @@ export const CATEGORIAS = {
   casas: 'Casas',
   edificios: 'Edificios',
   comercial: 'Comercial',
+  colegios: 'Colegios',
 } as const;
 
 export type Categoria = keyof typeof CATEGORIAS;
@@ -16,6 +17,8 @@ export interface DatosObra {
   orden: number;
   portada?: string | undefined;
   carrusel?: { foto: string; orden: number } | undefined;
+  /** Slug de la obra en cuyo álbum está esta obra (p. ej. un lote dentro de su condominio). */
+  album?: string | undefined;
 }
 
 export interface FotoObra<I> {
@@ -71,7 +74,34 @@ export function armarCatalogo<I>(
     return { ...datos, slug, fotos, fotoPortada };
   });
 
+  validarAlbumes(obras);
   return obras.sort((a, b) => a.orden - b.orden || a.slug.localeCompare(b.slug));
+}
+
+/** Los álbumes tienen un solo nivel y deben apuntar a una obra existente distinta de la propia. */
+function validarAlbumes(obras: { slug: string; album?: string | undefined }[]) {
+  const porSlug = new Map(obras.map((o) => [o.slug, o]));
+  for (const obra of obras) {
+    if (obra.album === undefined) continue;
+    if (obra.album === obra.slug) throw new Error(`Obra "${obra.slug}": no puede estar en su propio álbum.`);
+    const madre = porSlug.get(obra.album);
+    if (!madre) throw new Error(`Obra "${obra.slug}": el álbum "${obra.album}" no corresponde a ninguna obra.`);
+    if (madre.album !== undefined) {
+      throw new Error(
+        `Obra "${obra.slug}": su álbum "${madre.slug}" está a su vez en el álbum "${madre.album}"; los álbumes tienen un solo nivel.`,
+      );
+    }
+  }
+}
+
+/** Obras que se muestran en la grilla del inicio: las que no están dentro del álbum de otra. */
+export function obrasDeLaGrilla<I>(obras: Obra<I>[]): Obra<I>[] {
+  return obras.filter((obra) => obra.album === undefined);
+}
+
+/** Obras dentro del álbum de `slug`, en el orden del catálogo. */
+export function obrasDelAlbum<I>(obras: Obra<I>[], slug: string): Obra<I>[] {
+  return obras.filter((obra) => obra.album === slug);
 }
 
 /** Obra que sigue a `slug` en el orden del catálogo; desde la última vuelve a la primera. */

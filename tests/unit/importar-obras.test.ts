@@ -58,6 +58,7 @@ describe('importarObra', () => {
     expect(yaml).toContain('portada: foto-02\n');
     expect(yaml).toContain('ciudad: "Por confirmar" # PREGUNTA ABIERTA');
     expect(yaml).not.toContain('carrusel');
+    expect(yaml).not.toContain('album');
   });
 
   it('la foto del carrusel conserva hasta 2880 px', async () => {
@@ -68,6 +69,22 @@ describe('importarObra', () => {
     const destino = join(opciones.destino, 'casa-prueba');
     expect((await sharp(join(destino, 'foto-01.webp')).metadata()).width).toBe(2880);
     expect(await readFile(join(destino, 'index.yaml'), 'utf8')).toContain('carrusel:\n  foto: foto-01\n  orden: 3');
+  });
+
+  it('el manifiesto puede fijar el orden y el álbum', async () => {
+    await crear('casa-prueba-01FAVORITA.webp');
+    await manifiesto({ orden: 4, album: 'condominio-prueba' });
+    await importarObra('casa-prueba', opciones);
+
+    const yaml = await readFile(join(opciones.destino, 'casa-prueba', 'index.yaml'), 'utf8');
+    expect(yaml).toContain('orden: 4\n');
+    expect(yaml).toContain('album: condominio-prueba\n');
+  });
+
+  it('falla si el orden del manifiesto no es entero', async () => {
+    await crear('casa-prueba-01FAVORITA.webp');
+    await manifiesto({ orden: '4' });
+    await expect(importarObra('casa-prueba', opciones)).rejects.toThrow('"orden" debe ser un entero');
   });
 
   it('una reescalada con el mismo nombre sustituye a la de la carpeta', async () => {

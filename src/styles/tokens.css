@@ -13,6 +13,7 @@
   --espaciado-rotulo: 0.16em;
   --titulo-xl: clamp(52px, 9vw, 128px);
   --titulo-l: clamp(40px, 6vw, 88px);
+  --titulo-m: clamp(32px, 4.5vw, 64px);
 
   --ancho-pagina: 1440px;
   --ancho-fotos: 1160px;

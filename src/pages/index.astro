@@ -3,9 +3,11 @@ import Filtros from '../components/Filtros.astro';
 import GrillaObras from '../components/GrillaObras.astro';
 import Portada from '../components/Portada.astro';
 import Base from '../layouts/Base.astro';
+import { obrasDeLaGrilla } from '../lib/catalogo';
 import { obtenerLaminas, obtenerObras } from '../lib/obras';
 
-const obras = await obtenerObras();
+// Las obras que están dentro del álbum de otra (los lotes) solo se ven en la ficha de su álbum.
+const obras = obrasDeLaGrilla(await obtenerObras());
 const laminas = await obtenerLaminas();
 ---
 

@@ -2,26 +2,37 @@
 import type { GetStaticPaths } from 'astro';
 import BotonWhatsApp from '../../components/BotonWhatsApp.astro';
 import Foto from '../../components/Foto.astro';
+import ObrasDelAlbum from '../../components/ObrasDelAlbum.astro';
 import SiguienteObra from '../../components/SiguienteObra.astro';
 import { sitio } from '../../config/site';
 import Base from '../../layouts/Base.astro';
-import { esAngosta, obraSiguiente } from '../../lib/catalogo';
+import { esAngosta, obrasDeLaGrilla, obrasDelAlbum, obraSiguiente } from '../../lib/catalogo';
 import { obtenerObras, type ObraDelSitio } from '../../lib/obras';
 
 export const getStaticPaths = (async () => {
   const obras = await obtenerObras();
-  return obras.map((obra) => ({
-    params: { slug: obra.slug },
-    props: { obra, siguiente: obraSiguiente(obras, obra.slug) },
-  }));
+  const grilla = obrasDeLaGrilla(obras);
+  return obras.map((obra) => {
+    const album = obras.find((o) => o.slug === obra.album);
+    // "Siguiente obra" recorre la grilla o, en una obra de un álbum, solo sus hermanas.
+    const recorrido = album ? obrasDelAlbum(obras, album.slug) : grilla;
+    return {
+      params: { slug: obra.slug },
+      props: { obra, album, internas: obrasDelAlbum(obras, obra.slug), siguiente: obraSiguiente(recorrido, obra.slug) },
+    };
+  });
 }) satisfies GetStaticPaths;
 
 interface Props {
   obra: ObraDelSitio;
+  /** Obra en cuyo álbum está esta, si está en uno. */
+  album: ObraDelSitio | undefined;
+  /** Obras dentro del álbum de esta. */
+  internas: ObraDelSitio[];
   siguiente: ObraDelSitio;
 }
 
-const { obra, siguiente } = Astro.props;
+const { obra, album, internas, siguiente } = Astro.props;
 ---
 
 <Base
@@ -30,7 +41,13 @@ const { obra, siguiente } = Astro.props;
   imagen={obra.fotoPortada.imagen}
 >
   <main class="ficha">
-    <a href="/" class="rotulo volver">← Obras</a>
+    {
+      album ? (
+        <a href={`/obras/${album.slug}/`} class="rotulo volver">← {album.nombre}</a>
+      ) : (
+        <a href="/" class="rotulo volver">← Obras</a>
+      )
+    }
 
     <header class="encabezado">
       <h1 class="titular">{obra.nombre}</h1>
@@ -56,6 +73,8 @@ const { obra, siguiente } = Astro.props;
         })
       }
     </div>
+
+    {internas.length > 0 && <ObrasDelAlbum obras={internas} />}
 
     <div class="cierre">
       <SiguienteObra obra={siguiente} />
@@ -89,7 +108,7 @@ const { obra, siguiente } = Astro.props;
   }
 
   h1 {
-    font-size: var(--titulo-xl);
+    font-size: var(--titulo-m);
     text-wrap: balance;
   }
 
