@@ -20,6 +20,10 @@ const INTEGRANTES = ['Pablo A. Bueno Orellana', 'Teresa Y. Valdivia Ponce', 'Bru
 const NOMBRE_OFICINA = 'Bueno Valdivia Arquitectos';
 
 const laminaActiva = (page: Page) => page.locator('[data-lamina][data-activa] img');
+const lamina = (page: Page, i: number) => page.locator('[data-lamina]').nth(i);
+/** Escala actual de la foto de una lámina (1 = tamaño normal). */
+const escalaLamina = (page: Page, i: number) =>
+  lamina(page, i).locator('img').evaluate((img) => new DOMMatrix(getComputedStyle(img).transform).a);
 const menu = (page: Page) => page.locator('#menu');
 const abrirMenu = (page: Page) => page.getByRole('button', { name: 'Menú' }).click();
 const tarjetasVisibles = (page: Page) => page.locator('.grilla li:visible');
@@ -97,6 +101,40 @@ test.describe('inicio', () => {
     await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
   });
 
+  test('cada foto de la portada se acerca lenta y continuamente, sin mover el nombre', async ({ page }) => {
+    await page.goto('/');
+    const marca = () =>
+      page.evaluate(() =>
+        ['h1', '.integrantes'].map((s) => document.querySelector(`[data-portada] ${s}`)!.getBoundingClientRect().toJSON()),
+      );
+    const inicio = await marca();
+    await page.waitForTimeout(2500);
+    const aMitad = await escalaLamina(page, 0);
+    expect(aMitad, 'ya se acercó').toBeGreaterThan(1.01);
+    expect(aMitad, 'sin llegar al máximo').toBeLessThan(1.08);
+    await page.waitForTimeout(500);
+    expect(await escalaLamina(page, 0), 'sigue acercándose').toBeGreaterThan(aMitad);
+    expect(await marca(), 'el nombre y los integrantes no se mueven').toEqual(inicio);
+    await sinDesbordeHorizontal(page);
+  });
+
+  test('la foto que sale sigue acercándose durante el fundido y la que vuelve empieza de cero', async ({ page }) => {
+    await page.clock.install();
+    await page.goto('/');
+    await expect(lamina(page, 0)).toHaveAttribute('data-acercar', '');
+    await page.clock.runFor(5100);
+    await expect(lamina(page, 0)).not.toHaveAttribute('data-activa');
+    await expect(lamina(page, 0), 'sigue acercándose mientras se desvanece').toHaveAttribute('data-acercar', '');
+    await expect(lamina(page, 1)).toHaveAttribute('data-acercar', '');
+    await page.clock.runFor(1800);
+    await expect(lamina(page, 0), 'ya invisible, vuelve a su tamaño').not.toHaveAttribute('data-acercar');
+
+    await page.clock.runFor(5000 * (LAMINAS - 1) - 1800);
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
+    await expect(lamina(page, 0)).toHaveAttribute('data-acercar', '');
+    expect(await escalaLamina(page, 0), 'la que vuelve empieza desde su tamaño normal').toBeLessThan(1.02);
+  });
+
   test('la portada se detiene con la pestaña oculta', async ({ page }) => {
     await page.clock.install();
     await page.goto('/');
@@ -115,6 +153,8 @@ test.describe('inicio', () => {
     await page.clock.runFor(13000);
     await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
     await expect(page.locator('[data-lamina]').first()).toHaveCSS('transition-duration', '0s');
+    await expect(page.locator('[data-acercar]'), 'sin acercamiento').toHaveCount(0);
+    await expect(laminaActiva(page)).toHaveCSS('transform', 'none');
   });
 
   test('solo la primera foto de la portada se pide con prioridad; las demás esperan su turno', async ({ page }) => {
@@ -163,6 +203,7 @@ test.describe('inicio', () => {
     const page = await contexto.newPage();
     await page.goto('/');
     await expect(laminaActiva(page)).toHaveAttribute('src', /\.webp$/);
+    await expect(laminaActiva(page), 'la foto queda fija').toHaveCSS('transform', 'none');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
     await expect(page.locator('[data-filtros]')).toHaveCSS('visibility', 'hidden');
