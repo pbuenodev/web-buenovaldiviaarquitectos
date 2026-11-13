@@ -4,3 +4,6 @@ ubicacion: "Por confirmar" # PREGUNTA ABIERTA
 categoria: casas
 orden: 2
 portada: foto-01
+carrusel:
+  foto: foto-01
+  orden: 1

@@ -9,13 +9,13 @@ const CASAS = 4;
 const EDIFICIOS = 2;
 const COMERCIAL = 3;
 const COLEGIOS = 1;
-const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 9 };
+const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 10 };
 const SEGUNDA_OBRA = { slug: 'edificio-central-trafico-alameda', nombre: 'Edificio Central Tráfico Alameda' };
 const ULTIMA_OBRA = { slug: 'colegio-charles-school', nombre: 'Colegio Charles School' };
 // Lotes del álbum del condominio, en su orden.
 const LOTES = [1, 2, 4, 5].map((n) => ({ slug: `bosque-golf-lote-${n}`, nombre: `Bosque Golf, Lote ${n}` }));
-// Primera foto de la portada (orden 1): el Lote 5, que está en el carrusel aunque no en la grilla.
-const LAMINA_1 = 'Bosque Golf, Lote 5';
+// Primera foto de la portada (orden 1), elegida por el cliente.
+const LAMINA_1 = PRIMERA_OBRA.nombre;
 const INTEGRANTES = ['Pablo A. Bueno Orellana', 'Teresa Y. Valdivia Ponce', 'Bruno A. Bueno Valdivia'];
 const NOMBRE_OFICINA = 'Bueno Valdivia Arquitectos';
 

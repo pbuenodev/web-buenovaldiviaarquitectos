@@ -7,8 +7,5 @@
   "pendientes": [
     "ciudad",
     "ubicacion"
-  ],
-  "carrusel": {
-    "orden": 3
-  }
+  ]
 }

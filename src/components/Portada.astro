@@ -103,11 +103,13 @@ const fundido = 1800;
     }
   }
 
-  /* Un azul uniforme junta los tonos de las fotos; el degradado sostiene el título. */
+  /* Un azul uniforme junta los tonos de las fotos; el degradado inferior sostiene el título y el
+     superior, largo y suave, el logo sobre cielos casi blancos (sin marcar la franja de la cabecera). */
   .velo {
     position: absolute;
     inset: 0;
     background:
+      linear-gradient(180deg, rgb(13 24 40 / 0.4) 0, rgb(13 24 40 / 0.2) 12%, rgb(13 24 40 / 0) 28%),
       linear-gradient(180deg, rgb(13 24 40 / 0) 40%, rgb(13 24 40 / 0.55) 100%),
       rgb(13 24 40 / 0.4);
   }
