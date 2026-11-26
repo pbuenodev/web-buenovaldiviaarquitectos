@@ -17,12 +17,6 @@ const obras = defineCollection({
     categoria: z.enum(['casas', 'edificios', 'comercial', 'colegios']),
     orden: z.number().int(),
     portada: z.string().min(1).optional(),
-    carrusel: z
-      .object({
-        foto: z.string().min(1),
-        orden: z.number().int(),
-      })
-      .optional(),
     // Slug de la obra en cuyo álbum va esta (un lote dentro de su condominio).
     album: z.string().min(1).optional(),
   }),

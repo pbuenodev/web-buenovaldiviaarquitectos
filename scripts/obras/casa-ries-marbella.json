@@ -1,0 +1,18 @@
+{
+  "origen": "Casa Ries en Marbella",
+  "nombre": "Casa Ries en Marbella",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 17,
+  "repetidas": [
+    [
+      "00.webp",
+      "01.webp"
+    ]
+  ]
+}

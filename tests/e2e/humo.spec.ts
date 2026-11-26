@@ -3,19 +3,27 @@ import { expect, test, type Page } from '@playwright/test';
 // Prueba de humo del sitio construido. Se ejecuta en teléfono (390 px) y escritorio (1440 px).
 // Los nombres y cantidades corresponden a las obras cargadas en `src/content/obras/`.
 
-const OBRAS = 10; // obras en la grilla (los lotes de Bosque Golf van dentro del condominio)
-const LAMINAS = 3; // obras que participan en el hero
-const CASAS = 4;
-const EDIFICIOS = 2;
-const COMERCIAL = 3;
-const COLEGIOS = 1;
-const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 10 };
+const OBRAS = 21; // obras en la grilla (los lotes de Bosque Golf van dentro del condominio)
+const CASAS = 7;
+const EDIFICIOS = 3;
+const COMERCIAL = 7;
+const COLEGIOS = ['Colegio Charles School', 'Colegio Ecole Noel', 'Colegio Jean Jeaques', 'Colegio Zoltan Dienes'];
+const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 23 };
 const SEGUNDA_OBRA = { slug: 'edificio-central-trafico-alameda', nombre: 'Edificio Central Tráfico Alameda' };
-const ULTIMA_OBRA = { slug: 'colegio-charles-school', nombre: 'Colegio Charles School' };
+const ULTIMA_OBRA = { slug: 'colegio-zoltan-dienes', nombre: 'Colegio Zoltan Dienes' };
 // Lotes del álbum del condominio, en su orden.
-const LOTES = [1, 2, 4, 5].map((n) => ({ slug: `bosque-golf-lote-${n}`, nombre: `Bosque Golf, Lote ${n}` }));
-// Primera foto de la portada (orden 1), elegida por el cliente.
-const LAMINA_1 = PRIMERA_OBRA.nombre;
+const LOTES = [1, 2, 3, 4, 5].map((n) => ({ slug: `bosque-golf-lote-${n}`, nombre: `Bosque Golf, Lote ${n}` }));
+// Fotos de la portada, en su orden, por el nombre de su obra (su texto alternativo). Elegidas por el cliente.
+const PORTADA = [
+  PRIMERA_OBRA.nombre,
+  SEGUNDA_OBRA.nombre,
+  SEGUNDA_OBRA.nombre,
+  'Casa en El San Cristóbal',
+  'Edificio Panamericana',
+  'Edificio Panamericana',
+];
+const LAMINAS = PORTADA.length;
+const LAMINA_1 = PORTADA[0]!;
 const INTEGRANTES = ['Pablo A. Bueno Orellana', 'Teresa Y. Valdivia Ponce', 'Bruno A. Bueno Valdivia'];
 const NOMBRE_OFICINA = 'Bueno Valdivia Arquitectos';
 
@@ -76,6 +84,12 @@ test.describe('inicio', () => {
     for (const lote of LOTES) {
       await expect(page.locator(`.grilla a[href="/obras/${lote.slug}/"]`)).toHaveCount(0);
     }
+  });
+
+  test('la portada muestra las fotos elegidas por el cliente, en orden', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('[data-lamina] img')).toHaveCount(LAMINAS);
+    expect(await page.locator('[data-lamina] img').evaluateAll((imgs) => imgs.map((img) => img.getAttribute('alt')))).toEqual(PORTADA);
   });
 
   test('la portada no tiene botones, contador ni enlace a una obra', async ({ page }) => {
@@ -187,11 +201,12 @@ test.describe('inicio', () => {
 
     await filtro('Comercial').click();
     await expect(tarjetasVisibles(page)).toHaveCount(COMERCIAL);
+    await expect(page.locator('.grilla li:visible', { hasText: 'Centro de Diálisis' })).toHaveCount(2);
     await expect(filtro('Comercial')).toHaveAttribute('aria-pressed', 'true');
 
     await filtro('Colegios').click();
-    await expect(tarjetasVisibles(page)).toHaveCount(COLEGIOS);
-    await expect(tarjetasVisibles(page)).toContainText('Colegio Charles School');
+    await expect(tarjetasVisibles(page)).toHaveCount(COLEGIOS.length);
+    for (const colegio of COLEGIOS) await expect(page.locator('.grilla li:visible', { hasText: colegio })).toHaveCount(1);
     await expect(filtro('Colegios')).toHaveAttribute('aria-pressed', 'true');
 
     await filtro('Todas').click();
@@ -283,6 +298,8 @@ test.describe('ficha de obra', () => {
     const archivos = await fotos.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')!.split('/').pop()!.split('.')[0]!));
     // El orden de la ficha es el de los nombres: foto-01, foto-02…
     expect(archivos).toEqual(Array.from({ length: PRIMERA_OBRA.fotos }, (_, i) => `foto-${String(i + 1).padStart(2, '0')}`));
+    const fuentes = await fotos.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
+    expect(new Set(fuentes).size, 'ninguna foto se repite en la ficha').toBe(fuentes.length);
     for (const foto of await fotos.all()) {
       await expect(foto).toHaveAttribute('alt', PRIMERA_OBRA.nombre);
       await expect(foto).toHaveAttribute('width', /\d+/);

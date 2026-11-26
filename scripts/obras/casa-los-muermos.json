@@ -1,0 +1,12 @@
+{
+  "origen": "Casa en Los Muermos -Llanquihue",
+  "nombre": "Casa en Los Muermos",
+  "ciudad": "Los Muermos",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 15
+}

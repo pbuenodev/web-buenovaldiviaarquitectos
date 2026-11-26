@@ -1,0 +1,12 @@
+{
+  "origen": "Laboratorios Tecnolab",
+  "nombre": "Laboratorios Tecnolab",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 21
+}

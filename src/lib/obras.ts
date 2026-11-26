@@ -1,6 +1,6 @@
 import type { ImageMetadata } from 'astro';
 import { getCollection } from 'astro:content';
-import { armarCatalogo, laminasCarrusel, type FotoObra, type Lamina, type Obra } from './catalogo';
+import { armarCatalogo, laminasPortada, type FotoObra, type Lamina, type Obra } from './catalogo';
 
 export type ObraDelSitio = Obra<ImageMetadata>;
 export type FotoDelSitio = FotoObra<ImageMetadata>;
@@ -11,6 +11,11 @@ const modulos = import.meta.glob<{ default: ImageMetadata }>(
   '/src/content/obras/*/*.{webp,avif,jpg,jpeg,png}',
   { eager: true },
 );
+
+// Las fotos del hero no son de ninguna ficha: viven aparte y su nombre, `NN-<slug>`, dice su orden y su obra.
+const modulosPortada = import.meta.glob<{ default: ImageMetadata }>('/src/assets/portada/*.{webp,avif,jpg,jpeg,png}', {
+  eager: true,
+});
 
 // Astro copia a `dist/` el original de toda imagen cuyas propiedades se lean fuera de su
 // servicio de imágenes. Aquí se leen las medidas (foto angosta, anchos de `srcset`), así que
@@ -46,6 +51,11 @@ export function obtenerObras(): Promise<ObraDelSitio[]> {
   return catalogo;
 }
 
+/** Láminas de la portada del inicio, en el orden de sus archivos. */
 export async function obtenerLaminas(): Promise<LaminaDelSitio[]> {
-  return laminasCarrusel(await obtenerObras());
+  const fotos = Object.entries(modulosPortada).map(([ruta, modulo]) => ({
+    archivo: ruta.split('/').at(-1)!,
+    imagen: copiaSinRastreo(modulo.default),
+  }));
+  return laminasPortada(fotos, await obtenerObras());
 }

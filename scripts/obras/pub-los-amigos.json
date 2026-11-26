@@ -1,5 +1,5 @@
 {
-  "origen": "12-pub-los-amigos",
+  "origen": "Pub Los Amigos",
   "nombre": "Pub Los Amigos",
   "ciudad": "Por confirmar",
   "ubicacion": "Por confirmar",
@@ -7,5 +7,6 @@
   "pendientes": [
     "ciudad",
     "ubicacion"
-  ]
+  ],
+  "orden": 12
 }

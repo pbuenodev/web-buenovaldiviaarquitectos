@@ -1,5 +1,5 @@
 {
-  "origen": "07-edificio-panamericana",
+  "origen": "Edificio Panamericana",
   "nombre": "Edificio Panamericana",
   "ciudad": "Por confirmar",
   "ubicacion": "Por confirmar",
@@ -8,7 +8,5 @@
     "ciudad",
     "ubicacion"
   ],
-  "carrusel": {
-    "orden": 3
-  }
+  "orden": 7
 }

@@ -1,5 +1,5 @@
 {
-  "origen": "06-edificio-central-trafico-alameda",
+  "origen": "Edificio Central Trafico Alameda",
   "nombre": "Edificio Central Tráfico Alameda",
   "ciudad": "Por confirmar",
   "ubicacion": "Por confirmar",
@@ -8,7 +8,5 @@
     "ciudad",
     "ubicacion"
   ],
-  "carrusel": {
-    "orden": 2
-  }
+  "orden": 6
 }

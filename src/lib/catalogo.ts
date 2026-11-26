@@ -16,7 +16,6 @@ export interface DatosObra {
   categoria: Categoria;
   orden: number;
   portada?: string | undefined;
-  carrusel?: { foto: string; orden: number } | undefined;
   /** Slug de la obra en cuyo álbum está esta obra (p. ej. un lote dentro de su condominio). */
   album?: string | undefined;
 }
@@ -111,17 +110,23 @@ export function obraSiguiente<I>(obras: Obra<I>[], slug: string): Obra<I> {
   return obras[(indice + 1) % obras.length]!;
 }
 
-/** Láminas del carrusel: solo las obras que lo declaran, en el orden que indican. */
-export function laminasCarrusel<I>(obras: Obra<I>[]): Lamina<I>[] {
-  const laminas = obras
-    .filter((obra) => obra.carrusel)
-    .sort((a, b) => a.carrusel!.orden - b.carrusel!.orden || a.orden - b.orden)
-    .map((obra) => ({ obra, foto: buscarFoto(obra, obra.carrusel!.foto, 'carrusel.foto') }));
-
-  if (laminas.length === 0) {
-    throw new Error('El carrusel no tiene láminas: ninguna obra declara "carrusel" en su index.yaml.');
+/**
+ * Láminas de la portada del inicio: sus fotos propias, en el orden de su nombre de archivo.
+ * Cada archivo se llama `NN-<slug>`, donde `<slug>` es la obra de la foto (da su texto alternativo).
+ */
+export function laminasPortada<I>(fotos: FotoObra<I>[], obras: Obra<I>[]): Lamina<I>[] {
+  if (fotos.length === 0) {
+    throw new Error('La portada no tiene fotografías: src/assets/portada/ está vacía (ejecuta `pnpm importar portada`).');
   }
-  return laminas;
+  return [...fotos]
+    .sort((a, b) => a.archivo.localeCompare(b.archivo, 'es', { numeric: true }))
+    .map((foto) => {
+      const slug = /^\d{2,3}-(.+)$/.exec(sinExtension(foto.archivo))?.[1];
+      if (!slug) throw new Error(`Portada: el archivo "${foto.archivo}" no sigue el patrón NN-<slug>.`);
+      const obra = obras.find((o) => o.slug === slug);
+      if (!obra) throw new Error(`Portada: el archivo "${foto.archivo}" nombra la obra "${slug}", que no existe.`);
+      return { obra, foto };
+    });
 }
 
 /** Las fotos verticales o de baja resolución se muestran angostas y centradas. */

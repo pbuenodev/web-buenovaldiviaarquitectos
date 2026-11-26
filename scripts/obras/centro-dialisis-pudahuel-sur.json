@@ -1,0 +1,12 @@
+{
+  "origen": "Centro de Dialisis Pudahuel Sur",
+  "nombre": "Centro de Diálisis Pudahuel Sur",
+  "ciudad": "Pudahuel",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 20
+}

@@ -1,5 +1,5 @@
 {
-  "origen": "10-casa-san-cristobal",
+  "origen": "Casa en El San Cristobal",
   "nombre": "Casa en El San Cristóbal",
   "ciudad": "Por confirmar",
   "ubicacion": "Por confirmar",
@@ -7,5 +7,6 @@
   "pendientes": [
     "ciudad",
     "ubicacion"
-  ]
+  ],
+  "orden": 10
 }

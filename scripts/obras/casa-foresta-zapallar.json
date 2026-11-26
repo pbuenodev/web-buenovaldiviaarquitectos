@@ -1,5 +1,5 @@
 {
-  "origen": "13-casa-foresta-zapallar",
+  "origen": "Casa en La Foresta de Zapallar",
   "nombre": "Casa en La Foresta de Zapallar",
   "ciudad": "Zapallar",
   "ubicacion": "Por confirmar",
@@ -7,5 +7,16 @@
   "pendientes": [
     "ciudad",
     "ubicacion"
+  ],
+  "orden": 13,
+  "repetidas": [
+    [
+      "00.webp",
+      "07.webp"
+    ],
+    [
+      "03.webp",
+      "04.webp"
+    ]
   ]
 }

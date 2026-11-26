@@ -1,0 +1,12 @@
+{
+  "origen": "Colegio Zoltan Dienes",
+  "nombre": "Colegio Zoltan Dienes",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "colegios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 25
+}
