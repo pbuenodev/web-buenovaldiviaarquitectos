@@ -7,11 +7,15 @@ Describe la página de entrada del portafolio: un carrusel de fotografías a gra
 ## Requirements
 
 ### Requirement: Portada de pantalla completa
-La página de inicio SHALL abrir con una portada que ocupa toda la altura de la primera pantalla, con la cabecera superpuesta sobre la fotografía. La portada SHALL mostrar una fotografía por cada obra que participa en ella y, sobre las fotografías, el nombre de la oficina en mayúsculas, que MUST permanecer igual mientras cambian las fotografías. Un velo azul marino SHALL cubrir las fotografías y oscurecerse hacia abajo para mantener legible el nombre.
+La página de inicio SHALL abrir con una portada que ocupa toda la altura de la primera pantalla, con la cabecera superpuesta sobre la fotografía. La portada SHALL mostrar, en su orden, cada fotografía de la selección de portada y, sobre las fotografías, el nombre de la oficina en mayúsculas, que MUST permanecer igual mientras cambian las fotografías. Un velo azul marino SHALL cubrir las fotografías y oscurecerse hacia abajo para mantener legible el nombre.
 
 #### Scenario: Primera carga
 - **WHEN** una persona abre la página de inicio
 - **THEN** ve la primera fotografía a pantalla completa con su velo azul, la cabecera sobre ella y el nombre "Bueno Valdivia Arquitectos" en mayúsculas
+
+#### Scenario: Selección del cliente
+- **WHEN** se recorre la portada completa
+- **THEN** pasan seis fotografías: Bosque Golf El Condominio, dos del Edificio Central Tráfico Alameda, Casa en El San Cristóbal y dos del Edificio Panamericana, en ese orden, cada una con el nombre de su obra como texto alternativo
 
 #### Scenario: El nombre no cambia con la fotografía
 - **WHEN** la portada pasa de una fotografía a la siguiente
@@ -71,11 +75,11 @@ Sobre la grilla SHALL haber cinco filtros de texto: "Todas", "Casas", "Edificios
 
 #### Scenario: Filtrar por comercial
 - **WHEN** la persona elige "Comercial"
-- **THEN** la grilla muestra solo las obras de la categoría comercial y "Comercial" queda marcado como activo
+- **THEN** la grilla muestra solo las obras de la categoría comercial, entre ellas los dos centros de diálisis, y "Comercial" queda marcado como activo
 
 #### Scenario: Filtrar por colegios
 - **WHEN** la persona elige "Colegios"
-- **THEN** la grilla muestra solo las obras de la categoría colegios, entre ellas "Colegio Charles School", y "Colegios" queda marcado como activo
+- **THEN** la grilla muestra solo las obras de la categoría colegios: "Colegio Charles School", "Colegio Ecole Noel", "Colegio Jean Jeaques" y "Colegio Zoltan Dienes", y "Colegios" queda marcado como activo
 
 #### Scenario: Volver a todas
 - **WHEN** la persona elige "Todas" después de haber filtrado
