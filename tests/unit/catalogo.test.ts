@@ -3,7 +3,7 @@ import {
   armarCatalogo,
   CATEGORIAS,
   esAngosta,
-  laminasCarrusel,
+  laminasPortada,
   obrasDeLaGrilla,
   obrasDelAlbum,
   obraSiguiente,
@@ -30,8 +30,8 @@ const diez = fotos(
 function catalogoDeTres() {
   return armarCatalogo(
     [
-      { slug: 'c', datos: datos({ orden: 3, carrusel: { foto: 'exterior-02', orden: 1 } }) },
-      { slug: 'a', datos: datos({ orden: 1, carrusel: { foto: 'exterior-01.webp', orden: 2 } }) },
+      { slug: 'c', datos: datos({ orden: 3 }) },
+      { slug: 'a', datos: datos({ orden: 1 }) },
       { slug: 'b', datos: datos({ orden: 2 }) },
     ],
     new Map([
@@ -173,26 +173,27 @@ describe('obraSiguiente', () => {
   });
 });
 
-describe('laminasCarrusel', () => {
-  it('incluye solo las obras que lo declaran, en el orden del carrusel', () => {
-    const laminas = laminasCarrusel(catalogoDeTres());
-    expect(laminas.map((l) => [l.obra.slug, l.foto.archivo])).toEqual([
-      ['c', 'exterior-02.webp'],
-      ['a', 'exterior-01.webp'],
+describe('laminasPortada', () => {
+  it('ordena por nombre de archivo, toma la obra del nombre y admite varias fotos de una obra', () => {
+    const laminas = laminasPortada(fotos('02-c.webp', '00-a.webp', '01-c.webp', '10-b.webp'), catalogoDeTres());
+    expect(laminas.map((l) => [l.foto.archivo, l.obra.slug])).toEqual([
+      ['00-a.webp', 'a'],
+      ['01-c.webp', 'c'],
+      ['02-c.webp', 'c'],
+      ['10-b.webp', 'b'],
     ]);
   });
 
-  it('falla si la foto del carrusel no existe', () => {
-    const obras = armarCatalogo(
-      [{ slug: 'a', datos: datos({ carrusel: { foto: 'aerea', orden: 1 } }) }],
-      new Map([['a', diez]]),
-    );
-    expect(() => laminasCarrusel(obras)).toThrow(/"a".*"aerea".*carrusel\.foto/);
+  it('falla si la portada no tiene fotos', () => {
+    expect(() => laminasPortada([], catalogoDeTres())).toThrow(/no tiene fotografías/);
   });
 
-  it('falla si ninguna obra participa', () => {
-    const obras = armarCatalogo([{ slug: 'a', datos: datos() }], new Map([['a', diez]]));
-    expect(() => laminasCarrusel(obras)).toThrow(/no tiene láminas/);
+  it('falla nombrando el archivo y el slug si la obra no existe', () => {
+    expect(() => laminasPortada(fotos('00-z.webp'), catalogoDeTres())).toThrow(/"00-z\.webp".*"z"/);
+  });
+
+  it('falla si el archivo no sigue NN-<slug>', () => {
+    expect(() => laminasPortada(fotos('portada.webp'), catalogoDeTres())).toThrow(/"portada\.webp".*NN-<slug>/);
   });
 });
 

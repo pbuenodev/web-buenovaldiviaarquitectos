@@ -1,0 +1,12 @@
+{
+  "origen": "Casa Punta del Lacho",
+  "nombre": "Casa Punta del Lacho",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 16
+}

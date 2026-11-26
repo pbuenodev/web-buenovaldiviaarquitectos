@@ -7,11 +7,15 @@ Describe la página de entrada del portafolio: un carrusel de fotografías a gra
 ## Requirements
 
 ### Requirement: Portada de pantalla completa
-La página de inicio SHALL abrir con una portada que ocupa toda la altura de la primera pantalla, con la cabecera superpuesta sobre la fotografía. La portada SHALL mostrar una fotografía por cada obra que participa en ella y, sobre las fotografías, el nombre de la oficina en mayúsculas, que MUST permanecer igual mientras cambian las fotografías. Un velo azul marino SHALL cubrir las fotografías y oscurecerse hacia abajo para mantener legible el nombre.
+La página de inicio SHALL abrir con una portada que ocupa toda la altura de la primera pantalla, con la cabecera superpuesta sobre la fotografía. La portada SHALL mostrar, en su orden, cada fotografía de la selección de portada y, sobre las fotografías, el nombre de la oficina en mayúsculas, que MUST permanecer igual mientras cambian las fotografías. Un velo azul marino SHALL cubrir las fotografías y oscurecerse hacia abajo para mantener legible el nombre.
 
 #### Scenario: Primera carga
 - **WHEN** una persona abre la página de inicio
 - **THEN** ve la primera fotografía a pantalla completa con su velo azul, la cabecera sobre ella y el nombre "Bueno Valdivia Arquitectos" en mayúsculas
+
+#### Scenario: Selección del cliente
+- **WHEN** se recorre la portada completa
+- **THEN** pasan seis fotografías: Bosque Golf El Condominio, dos del Edificio Central Tráfico Alameda, Casa en El San Cristóbal y dos del Edificio Panamericana, en ese orden, cada una con el nombre de su obra como texto alternativo
 
 #### Scenario: El nombre no cambia con la fotografía
 - **WHEN** la portada pasa de una fotografía a la siguiente
@@ -71,11 +75,11 @@ Sobre la grilla SHALL haber cinco filtros de texto: "Todas", "Casas", "Edificios
 
 #### Scenario: Filtrar por comercial
 - **WHEN** la persona elige "Comercial"
-- **THEN** la grilla muestra solo las obras de la categoría comercial y "Comercial" queda marcado como activo
+- **THEN** la grilla muestra solo las obras de la categoría comercial, entre ellas los dos centros de diálisis, y "Comercial" queda marcado como activo
 
 #### Scenario: Filtrar por colegios
 - **WHEN** la persona elige "Colegios"
-- **THEN** la grilla muestra solo las obras de la categoría colegios, entre ellas "Colegio Charles School", y "Colegios" queda marcado como activo
+- **THEN** la grilla muestra solo las obras de la categoría colegios: "Colegio Charles School", "Colegio Ecole Noel", "Colegio Jean Jeaques" y "Colegio Zoltan Dienes", y "Colegios" queda marcado como activo
 
 #### Scenario: Volver a todas
 - **WHEN** la persona elige "Todas" después de haber filtrado
@@ -110,3 +114,34 @@ En la portada, el nombre de la oficina SHALL presentarse en dos líneas: "Bueno 
 #### Scenario: Contraste de los integrantes
 - **WHEN** se mide el contraste de los nombres de los integrantes sobre cada fotografía de la portada con su velo
 - **THEN** cumple al menos la relación 4,5:1
+
+### Requirement: Acercamiento lento de cada fotografía de la portada
+Mientras una fotografía de la portada está visible, SHALL acercarse de forma continua y a velocidad constante hacia su centro, desde su tamaño normal hasta 1,08 veces, sin deformarse. El acercamiento SHALL seguir durante el fundido de salida, sin detenerse ni retroceder mientras la foto se vea, y cada foto SHALL volver a empezar desde su tamaño normal cuando aparece de nuevo. El nombre de la oficina, los integrantes, la cabecera y el velo MUST NOT moverse ni cambiar de tamaño.
+
+#### Scenario: La foto se acerca mientras está visible
+- **WHEN** una fotografía de la portada lleva 2,5 segundos visible
+- **THEN** se ve más grande que al aparecer y menos de 1,08 veces su tamaño normal, y sigue creciendo
+
+#### Scenario: Sin detenerse en el fundido
+- **WHEN** la portada pasa a la fotografía siguiente
+- **THEN** la que sale sigue acercándose hasta desaparecer, y la que entra empieza a acercarse desde su tamaño normal
+
+#### Scenario: Vuelve a empezar
+- **WHEN** la portada da la vuelta y muestra otra vez la primera fotografía
+- **THEN** esa foto vuelve a empezar desde su tamaño normal
+
+#### Scenario: El nombre queda fijo
+- **WHEN** la fotografía se acerca
+- **THEN** el nombre de la oficina, los integrantes, la cabecera y el velo mantienen su posición y su tamaño
+
+#### Scenario: Sin desborde
+- **WHEN** una fotografía llega a su máximo acercamiento en una pantalla de 390 px o de 1440 px de ancho
+- **THEN** la página no se desplaza en horizontal y la foto sigue cubriendo toda la portada
+
+#### Scenario: Movimiento reducido
+- **WHEN** una persona con preferencia por movimiento reducido abre la página de inicio
+- **THEN** la primera fotografía se ve fija en su tamaño normal, sin acercamiento
+
+#### Scenario: Sin scripts
+- **WHEN** la página de inicio se abre con JavaScript desactivado
+- **THEN** la primera fotografía se ve fija en su tamaño normal

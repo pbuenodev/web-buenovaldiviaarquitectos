@@ -109,7 +109,7 @@ La ficha de una obra que tiene obras en su álbum SHALL mostrar, después de sus
 
 #### Scenario: Ficha del condominio
 - **WHEN** se abre la ficha de "Bosque Golf, El Condominio"
-- **THEN** después de sus fotos se ve el bloque "Lotes" con las tarjetas de los lotes 1, 2, 4 y 5, en ese orden
+- **THEN** después de sus fotos se ve el bloque "Lotes" con las tarjetas de los lotes 1, 2, 3, 4 y 5, en ese orden
 
 #### Scenario: Abrir un lote
 - **WHEN** la persona pulsa la tarjeta de "Bosque Golf, Lote 4" en la ficha del condominio

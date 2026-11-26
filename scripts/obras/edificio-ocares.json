@@ -1,0 +1,12 @@
+{
+  "origen": "Edificio Ocares -Lo Prado",
+  "nombre": "Edificio Ocares",
+  "ciudad": "Lo Prado",
+  "ubicacion": "Por confirmar",
+  "categoria": "edificios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 18
+}

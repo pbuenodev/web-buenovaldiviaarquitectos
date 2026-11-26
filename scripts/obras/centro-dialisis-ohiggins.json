@@ -1,0 +1,12 @@
+{
+  "origen": "Centro de Dialisis Ohiggins",
+  "nombre": "Centro de Diálisis O'Higgins",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 19
+}

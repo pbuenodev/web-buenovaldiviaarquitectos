@@ -1,5 +1,5 @@
 {
-  "origen": "07-edificio-panamericana",
+  "origen": "Edificio Panamericana",
   "nombre": "Edificio Panamericana",
   "ciudad": "Por confirmar",
   "ubicacion": "Por confirmar",
@@ -7,5 +7,6 @@
   "pendientes": [
     "ciudad",
     "ubicacion"
-  ]
+  ],
+  "orden": 7
 }

@@ -1,0 +1,13 @@
+{
+  "origen": "Bosque Golf - Marbella/Lote 3",
+  "nombre": "Bosque Golf, Lote 3",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "casas",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 3,
+  "album": "bosque-golf-el-condominio"
+}

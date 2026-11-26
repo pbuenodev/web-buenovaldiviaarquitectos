@@ -3,23 +3,35 @@ import { expect, test, type Page } from '@playwright/test';
 // Prueba de humo del sitio construido. Se ejecuta en teléfono (390 px) y escritorio (1440 px).
 // Los nombres y cantidades corresponden a las obras cargadas en `src/content/obras/`.
 
-const OBRAS = 10; // obras en la grilla (los lotes de Bosque Golf van dentro del condominio)
-const LAMINAS = 3; // obras que participan en el hero
-const CASAS = 4;
-const EDIFICIOS = 2;
-const COMERCIAL = 3;
-const COLEGIOS = 1;
-const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 9 };
+const OBRAS = 21; // obras en la grilla (los lotes de Bosque Golf van dentro del condominio)
+const CASAS = 7;
+const EDIFICIOS = 3;
+const COMERCIAL = 7;
+const COLEGIOS = ['Colegio Charles School', 'Colegio Ecole Noel', 'Colegio Jean Jeaques', 'Colegio Zoltan Dienes'];
+const PRIMERA_OBRA = { slug: 'bosque-golf-el-condominio', nombre: 'Bosque Golf, El Condominio', fotos: 23 };
 const SEGUNDA_OBRA = { slug: 'edificio-central-trafico-alameda', nombre: 'Edificio Central Tráfico Alameda' };
-const ULTIMA_OBRA = { slug: 'colegio-charles-school', nombre: 'Colegio Charles School' };
+const ULTIMA_OBRA = { slug: 'colegio-zoltan-dienes', nombre: 'Colegio Zoltan Dienes' };
 // Lotes del álbum del condominio, en su orden.
-const LOTES = [1, 2, 4, 5].map((n) => ({ slug: `bosque-golf-lote-${n}`, nombre: `Bosque Golf, Lote ${n}` }));
-// Primera foto de la portada (orden 1): el Lote 5, que está en el carrusel aunque no en la grilla.
-const LAMINA_1 = 'Bosque Golf, Lote 5';
+const LOTES = [1, 2, 3, 4, 5].map((n) => ({ slug: `bosque-golf-lote-${n}`, nombre: `Bosque Golf, Lote ${n}` }));
+// Fotos de la portada, en su orden, por el nombre de su obra (su texto alternativo). Elegidas por el cliente.
+const PORTADA = [
+  PRIMERA_OBRA.nombre,
+  SEGUNDA_OBRA.nombre,
+  SEGUNDA_OBRA.nombre,
+  'Casa en El San Cristóbal',
+  'Edificio Panamericana',
+  'Edificio Panamericana',
+];
+const LAMINAS = PORTADA.length;
+const LAMINA_1 = PORTADA[0]!;
 const INTEGRANTES = ['Pablo A. Bueno Orellana', 'Teresa Y. Valdivia Ponce', 'Bruno A. Bueno Valdivia'];
 const NOMBRE_OFICINA = 'Bueno Valdivia Arquitectos';
 
 const laminaActiva = (page: Page) => page.locator('[data-lamina][data-activa] img');
+const lamina = (page: Page, i: number) => page.locator('[data-lamina]').nth(i);
+/** Escala actual de la foto de una lámina (1 = tamaño normal). */
+const escalaLamina = (page: Page, i: number) =>
+  lamina(page, i).locator('img').evaluate((img) => new DOMMatrix(getComputedStyle(img).transform).a);
 const menu = (page: Page) => page.locator('#menu');
 const abrirMenu = (page: Page) => page.getByRole('button', { name: 'Menú' }).click();
 const tarjetasVisibles = (page: Page) => page.locator('.grilla li:visible');
@@ -74,6 +86,12 @@ test.describe('inicio', () => {
     }
   });
 
+  test('la portada muestra las fotos elegidas por el cliente, en orden', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('[data-lamina] img')).toHaveCount(LAMINAS);
+    expect(await page.locator('[data-lamina] img').evaluateAll((imgs) => imgs.map((img) => img.getAttribute('alt')))).toEqual(PORTADA);
+  });
+
   test('la portada no tiene botones, contador ni enlace a una obra', async ({ page }) => {
     await page.goto('/');
     const portada = page.locator('[data-portada]');
@@ -97,6 +115,40 @@ test.describe('inicio', () => {
     await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
   });
 
+  test('cada foto de la portada se acerca lenta y continuamente, sin mover el nombre', async ({ page }) => {
+    await page.goto('/');
+    const marca = () =>
+      page.evaluate(() =>
+        ['h1', '.integrantes'].map((s) => document.querySelector(`[data-portada] ${s}`)!.getBoundingClientRect().toJSON()),
+      );
+    const inicio = await marca();
+    await page.waitForTimeout(2500);
+    const aMitad = await escalaLamina(page, 0);
+    expect(aMitad, 'ya se acercó').toBeGreaterThan(1.01);
+    expect(aMitad, 'sin llegar al máximo').toBeLessThan(1.08);
+    await page.waitForTimeout(500);
+    expect(await escalaLamina(page, 0), 'sigue acercándose').toBeGreaterThan(aMitad);
+    expect(await marca(), 'el nombre y los integrantes no se mueven').toEqual(inicio);
+    await sinDesbordeHorizontal(page);
+  });
+
+  test('la foto que sale sigue acercándose durante el fundido y la que vuelve empieza de cero', async ({ page }) => {
+    await page.clock.install();
+    await page.goto('/');
+    await expect(lamina(page, 0)).toHaveAttribute('data-acercar', '');
+    await page.clock.runFor(5100);
+    await expect(lamina(page, 0)).not.toHaveAttribute('data-activa');
+    await expect(lamina(page, 0), 'sigue acercándose mientras se desvanece').toHaveAttribute('data-acercar', '');
+    await expect(lamina(page, 1)).toHaveAttribute('data-acercar', '');
+    await page.clock.runFor(1800);
+    await expect(lamina(page, 0), 'ya invisible, vuelve a su tamaño').not.toHaveAttribute('data-acercar');
+
+    await page.clock.runFor(5000 * (LAMINAS - 1) - 1800);
+    await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
+    await expect(lamina(page, 0)).toHaveAttribute('data-acercar', '');
+    expect(await escalaLamina(page, 0), 'la que vuelve empieza desde su tamaño normal').toBeLessThan(1.02);
+  });
+
   test('la portada se detiene con la pestaña oculta', async ({ page }) => {
     await page.clock.install();
     await page.goto('/');
@@ -115,6 +167,8 @@ test.describe('inicio', () => {
     await page.clock.runFor(13000);
     await expect(laminaActiva(page)).toHaveAttribute('alt', LAMINA_1);
     await expect(page.locator('[data-lamina]').first()).toHaveCSS('transition-duration', '0s');
+    await expect(page.locator('[data-acercar]'), 'sin acercamiento').toHaveCount(0);
+    await expect(laminaActiva(page)).toHaveCSS('transform', 'none');
   });
 
   test('solo la primera foto de la portada se pide con prioridad; las demás esperan su turno', async ({ page }) => {
@@ -147,11 +201,12 @@ test.describe('inicio', () => {
 
     await filtro('Comercial').click();
     await expect(tarjetasVisibles(page)).toHaveCount(COMERCIAL);
+    await expect(page.locator('.grilla li:visible', { hasText: 'Centro de Diálisis' })).toHaveCount(2);
     await expect(filtro('Comercial')).toHaveAttribute('aria-pressed', 'true');
 
     await filtro('Colegios').click();
-    await expect(tarjetasVisibles(page)).toHaveCount(COLEGIOS);
-    await expect(tarjetasVisibles(page)).toContainText('Colegio Charles School');
+    await expect(tarjetasVisibles(page)).toHaveCount(COLEGIOS.length);
+    for (const colegio of COLEGIOS) await expect(page.locator('.grilla li:visible', { hasText: colegio })).toHaveCount(1);
     await expect(filtro('Colegios')).toHaveAttribute('aria-pressed', 'true');
 
     await filtro('Todas').click();
@@ -163,6 +218,7 @@ test.describe('inicio', () => {
     const page = await contexto.newPage();
     await page.goto('/');
     await expect(laminaActiva(page)).toHaveAttribute('src', /\.webp$/);
+    await expect(laminaActiva(page), 'la foto queda fija').toHaveCSS('transform', 'none');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await expect(tarjetasVisibles(page)).toHaveCount(OBRAS);
     await expect(page.locator('[data-filtros]')).toHaveCSS('visibility', 'hidden');
@@ -242,6 +298,8 @@ test.describe('ficha de obra', () => {
     const archivos = await fotos.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')!.split('/').pop()!.split('.')[0]!));
     // El orden de la ficha es el de los nombres: foto-01, foto-02…
     expect(archivos).toEqual(Array.from({ length: PRIMERA_OBRA.fotos }, (_, i) => `foto-${String(i + 1).padStart(2, '0')}`));
+    const fuentes = await fotos.evaluateAll((imgs) => imgs.map((img) => img.getAttribute('src')));
+    expect(new Set(fuentes).size, 'ninguna foto se repite en la ficha').toBe(fuentes.length);
     for (const foto of await fotos.all()) {
       await expect(foto).toHaveAttribute('alt', PRIMERA_OBRA.nombre);
       await expect(foto).toHaveAttribute('width', /\d+/);

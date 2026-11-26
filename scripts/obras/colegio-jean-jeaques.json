@@ -1,0 +1,12 @@
+{
+  "origen": "Colegio Jean Jeaques",
+  "nombre": "Colegio Jean Jeaques",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "colegios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 24
+}

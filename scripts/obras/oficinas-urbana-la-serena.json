@@ -1,0 +1,12 @@
+{
+  "origen": "Oficinas Urbana en La Serena",
+  "nombre": "Oficinas Urbana en La Serena",
+  "ciudad": "La Serena",
+  "ubicacion": "Por confirmar",
+  "categoria": "comercial",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 22
+}

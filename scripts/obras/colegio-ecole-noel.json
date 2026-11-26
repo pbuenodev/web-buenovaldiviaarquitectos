@@ -1,0 +1,12 @@
+{
+  "origen": "Colegio Ecole Noel",
+  "nombre": "Colegio Ecole Noel",
+  "ciudad": "Por confirmar",
+  "ubicacion": "Por confirmar",
+  "categoria": "colegios",
+  "pendientes": [
+    "ciudad",
+    "ubicacion"
+  ],
+  "orden": 23
+}

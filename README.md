@@ -21,10 +21,10 @@ Portafolio de obras de la oficina Bueno Valdivia Arquitectos. Sitio estático he
 | `pnpm test:e2e` | Prueba de humo en navegador, en teléfono y escritorio. Requiere `pnpm build` antes |
 | `pnpm reescalar:instalar` | Descarga Real-ESRGAN (IA) a `tools/`, una sola vez. Ver «Reescalar fotos» |
 | `pnpm reescalar` | Amplía fotos con IA para usarlas de fondo. Ver «Reescalar fotos» |
-| `pnpm verificar:imagenes` | Falla si alguna imagen AVIF de `dist/` supera los 300 KB (400 KB las de más de 1600 px, que son las del carrusel) |
+| `pnpm verificar:imagenes` | Falla si alguna imagen AVIF de `dist/` supera los 300 KB (400 KB las de más de 1600 px, que son las del hero) |
 | `pnpm verificar` | Todo lo anterior en orden: tipos, pruebas, build, peso de imágenes y navegador |
 
-El primer `pnpm build` tarda unos minutos porque genera todas las versiones de las fotos; los siguientes reutilizan la caché de `node_modules/.astro/`.
+El primer `pnpm build` tarda unos 12 minutos (medido con las 272 fotos y las 6 del hero: 2129 versiones de imagen, `dist/` de 122 MB) porque genera todas las versiones de las fotos; los siguientes reutilizan la caché de `node_modules/.astro/` y tardan segundos. Las fotos fuente pesan 64 MB en `src/content/obras/` y 4 MB en `src/assets/portada/`. Cloudflare Pages corta los builds a los 20 minutos: si se acerca a ese límite, bajar `LADO_MAXIMO` en `scripts/importar-obras.mjs` y reimportar.
 
 ## Estructura
 
@@ -34,6 +34,7 @@ scripts/                 importar-obras, reescalar-imagenes y verificar-imagenes
 tools/                   herramientas descargadas (Real-ESRGAN); no se versiona
 src/
   assets/logo/           variantes del logo (original.svg es la fuente)
+  assets/portada/        fotos del hero, NN-<slug>.webp (las escribe `pnpm importar`)
   content/obras/<slug>/  una carpeta por obra: index.yaml y sus fotos
   content.config.ts      esquema que valida cada index.yaml
   config/site.ts         nombre, WhatsApp, mensajes y redes
@@ -64,42 +65,45 @@ No hace falta tocar código: se añade una carpeta y el sitio hace el resto.
    categoria: casas # casas | edificios | comercial | colegios
    orden: 2 # posición en la grilla y en "Siguiente obra"
    portada: foto-02 # opcional; por defecto, la primera foto
-   carrusel: # opcional; sin esto la obra no entra al hero del inicio (el campo se llama así por historia)
-     foto: foto-03
-     orden: 1 # posición de la lámina
    album: bosque-golf-el-condominio # opcional; la obra va dentro del álbum de esa obra (ver abajo)
    ```
 
    Una obra con `album` no aparece en la grilla del inicio: se ve en el bloque «Lotes» de la ficha de la obra madre, ordenada por su `orden` entre sus hermanas, y su «Siguiente obra» recorre solo las obras de ese álbum. Los álbumes tienen un solo nivel.
 
-4. Ejecutar `pnpm build`. Si falta un dato, la categoría no existe, la carpeta no tiene fotos o `portada` / `carrusel.foto` nombran un archivo que no está, el build falla y dice qué obra y qué dato corregir.
+4. Ejecutar `pnpm build`. Si falta un dato, la categoría no existe, la carpeta no tiene fotos o `portada` nombra un archivo que no está, el build falla y dice qué obra y qué dato corregir.
 
 Para quitar una obra, borrar su carpeta.
 
 Sobre las fotos:
 
-- Subir un archivo de buena calidad por foto, de **hasta 2000 px de lado mayor** (el sitio no sirve más de 1600 px en las fichas y la grilla; `pnpm importar` ya reduce las fotos a ese tamaño). Una fuente de 4096 px solo pesa más en el repositorio y alarga el build. La **foto del hero (`carrusel`)** es la excepción: se ve a pantalla completa, así que se conserva hasta **2880 px** y el sitio sirve hasta **2560 px**. Para ella conviene una foto de al menos 2560 px de ancho (ver «Reescalar fotos»). Los originales sin comprimir se guardan fuera del repositorio.
+- Subir un archivo de buena calidad por foto, de **hasta 2000 px de lado mayor** (el sitio no sirve más de 1600 px en las fichas y la grilla; `pnpm importar` ya reduce las fotos a ese tamaño). Una fuente de 4096 px solo pesa más en el repositorio y alarga el build. Las **fotos del hero** son la excepción: se ven a pantalla completa, así que se conservan hasta **2880 px** y el sitio sirve hasta **2560 px**. Para ellas conviene una foto de al menos 2560 px de ancho (ver «Reescalar fotos»). Los originales sin comprimir se guardan fuera del repositorio.
 - Las fotos verticales y las de menos de 900 px de ancho se muestran más angostas y centradas en la ficha, sin ampliarse.
 - Si `pnpm verificar:imagenes` falla, bajar la calidad AVIF en `src/components/Foto.astro` (hoy 50).
 
-## Importar obras desde la selección del cliente
+## Importar obras desde la entrega del cliente
 
-El cliente entrega una carpeta curada, `~/Descargas/Seleccion Portafolio` (fuera del repositorio), y esa carpeta manda:
+El cliente entrega una carpeta, `~/Descargas/webPabloBueno-fotografiasCierre` (fuera del repositorio), y esa carpeta manda en las fotos:
 
-- `NN-<slug>/` es una obra: `NN` es su posición en la grilla (`orden`) y `<slug>` su dirección.
-- Dentro, cada foto se llama `<slug>-NN.webp`. El número es el orden en la ficha; los huecos (fotos que el cliente descartó) no importan.
-- La foto que lleva `FAVORITA` (`<slug>-03FAVORITA.webp`) es la portada de la obra. Debe haber exactamente una por obra.
-- `reescaladas/` puede traer una versión ampliada de una foto con el mismo nombre; si existe, se usa en su lugar.
+- Cada obra es una carpeta con su nombre (`Casa en El San Cristobal/`). Puede ir dentro de otra (`Bosque Golf - Marbella/Lote 3/`).
+- Dentro, las fotos se llaman `00.webp`, `01.webp`… El número es el orden en la ficha; los huecos (fotos que el cliente descartó) no importan. La primera es la portada de la obra.
+- `00 PARA LA PORTADA/` trae las fotos del hero, en su orden. No se agregan a ninguna ficha.
+- `reescaladas/<carpeta de origen>/` puede traer una versión ampliada de una foto con el mismo nombre (por ejemplo `reescaladas/00 PARA LA PORTADA/01.webp`); si existe, se usa en su lugar.
 
-Los datos que no vienen de la carpeta están en `scripts/obras/<slug>.json`: `origen` (la carpeta `NN-<slug>`), `nombre`, `categoria`, `ciudad`, `ubicacion`, `pendientes` (los datos aún por confirmar se dejan como `Por confirmar` y salen marcados con `# PREGUNTA ABIERTA` en el `index.yaml`); si la obra va en el carrusel, `carrusel: { "orden": N }` (la foto es la favorita); si va dentro del álbum de otra obra, `album: "<slug>"`; y, opcionalmente, `orden: N` para fijar el orden en lugar del `NN` de la carpeta (los lotes de Bosque Golf lo usan para quedar de L1 a L5).
+Lo que no viene de la carpeta está en el repositorio:
+
+- `scripts/obras/<slug>.json`, uno por obra. El nombre del archivo es el slug (la dirección `/obras/<slug>/`). Campos: `origen` (la carpeta de la obra en la entrega, p. ej. `"Bosque Golf - Marbella/Lote 3"`), `nombre`, `ciudad`, `ubicacion`, `categoria`, `orden` (posición en la grilla, o entre los lotes de un álbum), `pendientes` (los datos aún por confirmar salen marcados con `# PREGUNTA ABIERTA` en el `index.yaml`), `album: "<slug>"` si va dentro del álbum de otra obra, y `repetidas` (ver abajo).
+- `scripts/portada.json`: `origen` (la carpeta del hero) y `fotos`, que dice de qué obra es cada foto (`"03.webp": "casa-san-cristobal"`). La obra da el texto alternativo de la lámina. Una obra puede tener varias fotos en el hero.
 
 ```sh
-pnpm importar                              # todas las obras
-pnpm importar casa-santo-domingo           # solo una
-pnpm importar --entrega /ruta/a/la/entrega # si la selección está en otro lugar
+pnpm importar                              # todas las obras y el hero
+pnpm importar casa-santo-domingo           # solo una obra
+pnpm importar portada                      # solo el hero
+pnpm importar --entrega /ruta/a/la/entrega # si la entrega está en otro lugar
 ```
 
-El script renombra las fotos a `foto-01`, `foto-02`… (en el orden del cliente, sin huecos), las reduce a 2000 px de lado mayor (2880 la favorita de una obra del carrusel; sin ampliar) y reescribe la carpeta de la obra. Falla, nombrando el archivo, si una foto no sigue el patrón, si un número se repite o si una obra no tiene exactamente una favorita. Para cambiar el orden o la portada, el cliente renombra en su carpeta y se vuelve a importar. Los originales y los `.DS_Store` no se guardan en el repositorio.
+El script renombra las fotos a `foto-01`, `foto-02`… (en el orden del cliente, sin huecos), las reduce a 2000 px de lado mayor (sin ampliar) y reescribe la carpeta de la obra. Las del hero las guarda en `src/assets/portada/NN-<slug>.webp`, hasta 2880 px. Falla, nombrando el archivo, si una foto no sigue el patrón `NN.webp`, si un número se repite, si una foto del hero no tiene obra o si nombra una obra que no existe. Para cambiar el orden de las fotos, el cliente renombra en su carpeta y se vuelve a importar. Los originales y los `.DS_Store` no se guardan en el repositorio.
+
+**Fotos repetidas.** Antes de importar, el script compara todas las fotos de obra de la entrega por su contenido (una huella perceptual), aunque tengan otro nombre o tamaño, y falla listando cada par repetido. Si las dos fotos son de la misma obra, se declara el par en su manifiesto, `"repetidas": [["00.webp", "07.webp"]]`, y queda una sola: la de mayor resolución, en la posición del número menor. Una repetida entre obras distintas no se puede declarar: se corrige en la entrega. En el cierre se declararon tres: Foresta de Zapallar (`00`/`07` y `03`/`04`) y Casa Ries (`00`/`01`).
 
 ## Reescalar fotos
 
@@ -126,7 +130,7 @@ pnpm reescalar carpeta/ --salida ../reescaladas --ancho 2560 --mezcla 0.8
 
 La IA amplía 4× y el resultado se reduce con Lanczos al ancho pedido, lo que atenúa sus artefactos. **Ampliar no crea detalle real**: sirve para que un fondo no se vea blando, no para rescatar una foto mala. Revisar siempre el resultado al 100 %.
 
-Las fotos de las fichas y la grilla se reducen igualmente a 2000 px al importar; solo la marcada como `carrusel` conserva hasta 2880 px. El instalador solo cubre Linux.
+Las fotos de las fichas y la grilla se reducen igualmente a 2000 px al importar; solo las del hero conservan hasta 2880 px. El instalador solo cubre Linux.
 
 ## Datos de contacto
 
@@ -145,11 +149,12 @@ Ver `.env.example`.
 
 Antes de publicar para el cliente hay que cambiar:
 
-- [x] Fotografías, nombres, orden de las obras y de las fotos y portadas: ya son la selección del cliente (14 obras, 89 fotos)
-- [ ] Ciudad y ubicación de las obras: valen `Por confirmar` (salvo Zapallar y Santo Domingo, tomadas del nombre y aún sin confirmar). Están marcadas con `# PREGUNTA ABIERTA` en cada `index.yaml`; editarlas en `scripts/obras/<slug>.json` y reimportar
-- [ ] Confirmar las 3 láminas del hero y su orden (quedaron las de mejor tono; el resto se retiró por no combinar con el azul del sitio; pedir al cliente fotos de atardecer o con luz cálida para ampliarlo) y que la portada vertical de Edificio Panamericana se ve bien en la grilla
-- [ ] Bosque Golf: confirmar que va en cinco fichas (El Condominio y Lotes 1, 2, 4 y 5) y no en una sola, y pedir las fotos mejoradas de Lote 3 (solo llegaron los originales)
-- [ ] Confirmar los rótulos de categoría "Edificios" y "Comercial" y que el Colegio Charles School va con los edificios
+- [x] Fotografías y portadas: ya son la entrega final del cliente (26 obras, 272 fotos, 6 láminas en el hero)
+- [ ] Ciudad y ubicación de las obras: valen `Por confirmar` (salvo Zapallar, Santo Domingo, Los Muermos, Lo Prado, Pudahuel y La Serena, tomadas del nombre y aún sin confirmar). Están marcadas con `# PREGUNTA ABIERTA` en cada `index.yaml`; editarlas en `scripts/obras/<slug>.json` y reimportar
+- [ ] Confirmar el orden de la grilla: las 10 obras anteriores conservan su posición y las 11 nuevas van al final, agrupadas por categoría (`orden` en cada manifiesto)
+- [ ] Confirmar la escritura de «Colegio Jean Jeaques» (¿Jean Jacques?) y «Edificio Ocares»
+- [ ] Pedir mejores originales de Casa Ries en Marbella (453–604 px) y Oficinas Urbana en La Serena (640–960 px): se ven angostas en la ficha
+- [ ] Confirmar los rótulos de categoría "Edificios" y "Comercial" (diálisis, laboratorio y oficinas van en Comercial)
 - [ ] Número de WhatsApp `+56 9 0000 0000` en `src/config/site.ts`
 - [ ] Direcciones de Instagram y Facebook en `src/config/site.ts`
 - [ ] `SITE_URL` con el dominio definitivo
